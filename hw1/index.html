@@ -71,7 +71,14 @@
 
 			My algorithm is no worse than one that checks each sample within the bounding box of the triangle (since that is exactly how it works), but it lacks certain optimizations that could improve performance like tiled triangle traversal.
 
-			Pictured below is a <i>png</i> screenshot of my rasterizer displaying <i>basic/test4.svg</i> with the default viewing parameters with the pixel inspector hovering over an area close to the corner of a very thin triangle. As you can see, our image is suffering from jaggies, and even leaves some pixels blank where the triangle does quite pass through the center of a pixel. This kind of aliasing is occuring because we only sample the <b>center</b> of each pixel when rasterizing, not allowing us to represent the geometry in an accurate or appealing way.    
+			Pictured below is a <i>png</i> screenshot of my rasterizer displaying <i>basic/test4.svg</i> with the default viewing parameters with the pixel inspector hovering over an area close to the corner of a very thin triangle. 
+			
+			<figure>
+				<img src="./images/screenshot_7-7_20-5-30" alt="basic/test4.svg" style="width:50%" />
+				<figcaption>Rasterization of <i>basic/test4.svg</i> without utilizing any antialiasing techniques.</figcaption>
+			</figure>
+			
+			As you can see, our image is suffering from jaggies, and even leaves some pixels blank where the triangle does quite pass through the center of a pixel. This kind of aliasing is occuring because we only sample the <b>center</b> of each pixel when rasterizing, not allowing us to represent the geometry in an accurate or appealing way.    
 
 
 			<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
