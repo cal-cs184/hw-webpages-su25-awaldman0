@@ -65,8 +65,8 @@
 				</li>
 				<li>Define a vector for each side of the triangle and its corresponding normal vector</li>
 				<li>Among the x and y values passed into the function, find the smallest and largest x and y values. Then take the <code>floor()</code> of those values and add 0.5, which gives us the coordinates of the center of each pixel that defines the triangle's bounding box.</li>
-				<li>Iterate through each pixel in the bounding box, checking if the center of the current pixel is in the triangle by calculating the dot product of the vector bewteen the "first" point in each side of the triangle and the current coordinate with its cooresponding normal vector. we calculated earlier is greater than or equal to 0. This way, pixels that lie on the edge of a given triangle are drawn to the screen in addition to those that lie inside.  </li>
-				<li>If the dot product is greater than or equal to 0 (to ensure we rasterize edges in addition to interior points) for all three sides and the current point lies on screen, then we draw it on screen.</li>
+				<li>Iterate through each pixel in the bounding box, checking if the center of the current pixel is in the triangle by calculating the dot product of the vector bewteen the "first" point in each side of the triangle and the current coordinate with its cooresponding normal vector.</li>
+				<li>If the current point lies on screen and he dot product is greater than or equal to 0 (to ensure we rasterize the edges in addition to interior points) for all three sides, then we draw it on screen.</li>
 			</ol>
 
 			My algorithm is no worse than one that checks each sample within the bounding box of the triangle (since that is exactly how it works), but it lacks certain optimizations that could improve performance like tiled triangle traversal.
@@ -74,7 +74,7 @@
 			Pictured below is a <i>png</i> screenshot of my rasterizer displaying <i>basic/test4.svg</i> with the default viewing parameters with the pixel inspector hovering over an area close to the corner of a very thin triangle. 
 			
 			<figure>
-				<img src="images/screenshot_7-7_20-5-30" alt="basic/test4.svg" style="width:50%" />
+				<img src="./images/screenshot_7-7_20-5-30.png" alt="basic/test4.svg" style="width:50%" />
 				<figcaption>Rasterization of <i>basic/test4.svg</i> without utilizing any antialiasing techniques.</figcaption>
 			</figure>
 			
