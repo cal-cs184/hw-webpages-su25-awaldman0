@@ -60,8 +60,8 @@
 
 			<ol>
 				<li>
-					When checking if a point lies within a triangle, my algorithm assumes the points <code>(x0, y0), (x1, y1), and (x2, y2)</code> are in counterclockwise winding order. Therefore, I need to ensure the x and y values passed into the function are in counterclockwise order by the time I do any bounds checking. I do this by creating two vectors, one between (x0, y0) and (x1, y1) and the other bewteen (x1, y1) and (x2, y2) and computing the cross product.
-					If the cross product is negative, the point data is in clockwise order, in which case I swap the values of (x1, y1) and (x2, y2) to ensure a counterclockwise winding order.
+					When checking if a point lies within a triangle, my algorithm assumes the points <code>(x0, y0), (x1, y1),</code> and <code>(x2, y2)</code> are in counterclockwise winding order. Therefore, I need to ensure the x and y values passed into the function are in counterclockwise order by the time I do any bounds checking. I do this by creating two vectors, one between <code>(x0, y0)</code> and <code>(x1, y1)</code> and the other bewteen <code>(x1, y1)</code> and <code>(x2, y2)</code> and computing the cross product.
+					If the cross product is negative, the point data is in clockwise order, in which case I swap the values of <code>(x1, y1) </code> and <code>(x2, y2)</code> to ensure a counterclockwise winding order.
 				</li>
 				<li>Define a vector for each side of the triangle and its corresponding normal vector</li>
 				<li>Among the x and y values passed into the function, find the smallest and largest x and y values. Then take the <code>floor()</code> of those values and add 0.5, which gives us the coordinates of the center of each pixel that defines the triangle's bounding box.</li>
@@ -74,7 +74,7 @@
 			Pictured below is a <i>png</i> screenshot of my rasterizer displaying <i>basic/test4.svg</i> with the default viewing parameters with the pixel inspector hovering over an area close to the corner of a very thin triangle. 
 			
 			<figure>
-				<img src="./images/screenshot_7-7_20-5-30" alt="basic/test4.svg" style="width:50%" />
+				<img src="images/screenshot_7-7_20-5-30" alt="basic/test4.svg" style="width:50%" />
 				<figcaption>Rasterization of <i>basic/test4.svg</i> without utilizing any antialiasing techniques.</figcaption>
 			</figure>
 			
