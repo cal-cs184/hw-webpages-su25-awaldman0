@@ -77,7 +77,44 @@
 
 
 			<h2>Task 2: Antialiasing by Supersampling</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			In order to remedy the aliasing seen in the screenshot from task 1, I implemented supersampling functionality into the rasterizer. Supersampling works by sampling multiple points <b>within</b> a single pixel and averaging out the results in order to determine a pixel's final color. This way, whether or not a triangle passes through the center of a pixel is no longer the sole factor when it comes to determining how a pixel is colored in. Supersampling is extremely helpful for getting rid of jaggies because it allows you to soften the edges of your geometry by blending edge pixels with those around them. When sampling, pixel/color data is initially stored in the <code>sample_buffer</code> vector before being finalized and put into <code>rgb_framebuffer_target</code> (which contains the data actually drawn to the screen). Since I need to store multiple samples per pixel and have to accomodate multiple potential sampling rates, I had to make some changes to the way my rasterizer manages memory to allow <code>sample_buffer</code> to be resized depending on the current sample rate.
+
+			In order to implement supersampling and support multiple supersampling rates, I did the following:
+
+			<ol>
+				<li>
+					In <code>RasterizerImp::set_sample_rate()</code>, I changed <code>this->sample_rate</code> to equal the rate passed into the fucntion and altered the call to <code>resize()</code> to scale the size of the vector by the rate passed into the function.
+				</li>
+				<li>
+					In <code>RasterizerImp::set_framebuffer_target()</code>, I altered the call to <code>resize()</code> to scale the size of the vector by the rate passed into the function.
+				</li>
+				<li>
+					I left <code>RasterizerImp::clear_buffers()</code> unchanged.
+				</li>
+			</ol>
+
+			Next, I needed to actually implement supersampling functionality, which involved changing my implementation for <code>RasterizerImp::rasterize_triangle()</code> and <code>RasterizerImp::fill_pixel()</code>.
+
+			I made the following changes to <code>RasterizerImp::rasterize_triangle()</code>:
+
+			<ol>
+				<li>
+					Within the nested for loop used to iterate through each pixel in the triangle's bounding box, I added another nested for loop that would perform <code>sqrt(sample_rate) * sqrt(sample_rate)</code> samples at uniformally distributed locations within the current pixel.
+				</li>
+				<li>
+					I defined a variable <i>offset</i> equal to <code>1 / sqrt(this->sample_rate)</code>.
+				</li>
+				<li>
+					For pixel <code>(i, j)</code> and sub-pixel location <code>(k, l)</code> I sampled at <code>(i + (k * offset) + (offset / 2), j + (l * offset) + (offset / 2))</code>, which resulted in evenly distributed samples within the pixel.
+				</li>
+				<li>I performed the sample in-triangle tests as before, making sure to store the result at the proper index of <code>sample_buffer</code>, whose size changed depending on the sample rate</li>
+			</ol>
+
+			Then, I altered <code>RasterizerImp::fill_pixel()</code> to set all of the indices corresponding to a particular pixel in <code>sample_buffer</code> to the same color so that the rasterizer could still render points and lines normally even after all of the samples within a pixel were averaged out.
+
+			Finally, I changed <code>RasterizerImp::resolve_to_framebuffer()</code> such that for each pixel <code>(x, y)</code>, the function iterated through each sub-pixel sample, adding up the red, green, and blue componenets of the color stored at that location in <code>sample_buffer</code>. The function then divides the sums by the number of samples to obtain the average values of the red, green, and blue componenets of a particular pixel. Lastly, these average values are converted to 8-bit values and passed into <code>rgb_framebuffer_target</code>.
+
+			The results of using supersampling in my rasterizer can be seen below, as the edges look much smoother when the sampling rate is higher. Supersampling allows the rasterizer also performs much better when it comes to displaying very thin pieces of geometry, as it no longer leaves a pixel totally blank when a triangle does not happen to overlap with its center.
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
