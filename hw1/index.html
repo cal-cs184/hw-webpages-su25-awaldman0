@@ -66,44 +66,44 @@
 
 			My algorithm is no worse than one that checks each sample within the bounding box of the triangle (since that is exactly how it works), but it lacks certain optimizations that could improve performance like tiled triangle traversal.
 
-			Pictured below is a <i>png</i> screenshot of my rasterizer displaying <i>basic/test4.svg</i> with the default viewing parameters with the pixel inspector hovering over an area close to the corner of a very thin triangle. 
-			
+			Pictured below is a <i>png</i> screenshot of my rasterizer displaying <i>basic/test4.svg</i> with the default viewing parameters with the pixel inspector hovering over an area close to the corner of a very thin triangle.
+
 			<figure>
 				<img src="./images/screenshot_7-7_20-5-30.png" alt="basic/test4.svg" style="width:400px" />
 				<figcaption>Rasterization of <i>basic/test4.svg</i> without utilizing any antialiasing techniques.</figcaption>
 			</figure>
-			
-			As you can see, our image is suffering from jaggies, and even leaves some pixels blank where the triangle does quite pass through the center of a pixel. This kind of aliasing is occuring because we only sample the <b>center</b> of each pixel when rasterizing, not allowing us to represent the geometry in an accurate or appealing way.    
 
+			As you can see, our image is suffering from jaggies, and even leaves some pixels blank where the triangle does quite pass through the center of a pixel. This kind of aliasing is occuring because we only sample the <b>center</b> of each pixel when rasterizing, not allowing us to represent the geometry in an accurate or appealing way.
+
+
+			<h2>Task 2: Antialiasing by Supersampling</h2>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 			<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="lion.jpg" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="./images/screenshot_7-8_18-23-37.png" width="400px" />
+							<figcaption>Supersample rate 1 per pixel</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="lion.jpg" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="./images/screenshot_7-8_18-23-39.png" width="400px" />
+							<figcaption>Supersample rate 4 per pixel</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="lion.jpg" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="./images/screenshot_7-8_18-23-41.png" width="400px" />
+							<figcaption>Supersample rate 9 per pixel</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="lion.jpg" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="./images/screenshot_7-8_18-23-43.png" width="400px" />
+							<figcaption>Supersample rate 16 per pixel</figcaption>
 						</td>
 					</tr>
 				</table>
 			</div>
-
-			<h2>Task 2: Antialiasing by Supersampling</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 			<h2>Task 3: Transforms</h2>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
