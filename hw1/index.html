@@ -95,7 +95,7 @@
 
 			Next, I needed to actually implement supersampling functionality, which involved changing my implementation for <code>RasterizerImp::rasterize_triangle()</code> and <code>RasterizerImp::fill_pixel()</code>.
 
-			I made the following changes to <code>RasterizerImp::rasterize_triangle()</code>:
+			<p>I made the following changes to <code>RasterizerImp::rasterize_triangle()</code>:</p>
 
 			<ol>
 				<li>
@@ -110,11 +110,11 @@
 				<li>I performed the sample in-triangle tests as before, making sure to store the result at the proper index of <code>sample_buffer</code>, whose size changed depending on the sample rate</li>
 			</ol>
 
-			Then, I altered <code>RasterizerImp::fill_pixel()</code> to set all of the indices corresponding to a particular pixel in <code>sample_buffer</code> to the same color so that the rasterizer could still render points and lines normally even after all of the samples within a pixel were averaged out.
+			<p>Then, I altered <code>RasterizerImp::fill_pixel()</code> to set all of the indices corresponding to a particular pixel in <code>sample_buffer</code> to the same color so that the rasterizer could still render points and lines normally even after all of the samples within a pixel were averaged out.</p>
 
-			Finally, I changed <code>RasterizerImp::resolve_to_framebuffer()</code> such that for each pixel <code>(x, y)</code>, the function iterated through each sub-pixel sample, adding up the red, green, and blue componenets of the color stored at that location in <code>sample_buffer</code>. The function then divides the sums by the number of samples to obtain the average values of the red, green, and blue componenets of a particular pixel. Lastly, these average values are converted to 8-bit values and passed into <code>rgb_framebuffer_target</code>.
+			<p>Finally, I changed <code>RasterizerImp::resolve_to_framebuffer()</code> such that for each pixel <code>(x, y)</code>, the function iterated through each sub-pixel sample, adding up the red, green, and blue componenets of the color stored at that location in <code>sample_buffer</code>. The function then divides the sums by the number of samples to obtain the average values of the red, green, and blue componenets of a particular pixel. Lastly, these average values are converted to 8-bit values and passed into <code>rgb_framebuffer_target</code>.</p>
 
-			The results of using supersampling in my rasterizer can be seen below, as the edges look much smoother when the sampling rate is higher. Supersampling allows the rasterizer also performs much better when it comes to displaying very thin pieces of geometry, as it no longer leaves a pixel totally blank when a triangle does not happen to overlap with its center.
+			<p>The results of using supersampling in my rasterizer can be seen below, as the edges look much smoother when the sampling rate is higher. Supersampling allows the rasterizer also performs much better when it comes to displaying very thin pieces of geometry, as it no longer leaves a pixel totally blank when a triangle does not happen to overlap with its center.</p>
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -142,7 +142,7 @@
 			</div>
 
 			<h2>Task 3: Transforms</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			After properly implementing transformations, I was able to employ scaling, translation, and rotation operations to alter <i>robot.svg</i> and create something new. I decided to try to make cubeman do some yoga, which I figured would require using all of the transformations I just coded in order to make the pose look right. The screenshot below depicts cubeman in tree pose, where you balance on one foot, planting your other foot on your standing leg and placing your arms above your head to extend the body upwards.
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
