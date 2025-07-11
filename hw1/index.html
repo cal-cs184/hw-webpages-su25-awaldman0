@@ -199,8 +199,6 @@
 			</div>
 
 			<p>The difference between the two pixel sampling methods is extremely apparant in the images above. Bilinear sampling is clearly preferable in this case, as it makes the text on the seal much more legible by smoothing out color differences. </p>
-			Pictured below is the same image using different pixel sampling methods and supersampling rates. AT 1 sample per pixel, the differences between nearest-neighbor and bilinear pixel sampling aren't too hard to spot, espectially if you zoom in on the left edge of the campinele. When we increase the number of samples per pixel to 16, however, the difference is nearly imperceptible (even under the pixel inspector), going to show how using a more computationally expensive and "better" pixel sampling method does not always result in noticeably higher quality image. This means that, in certain situations, bilinear pixel sampling may not be worth it over simpler, less precise approaches to texture sampling.  
-
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -226,6 +224,7 @@
 					</tr>
 				</table>
 			</div>
+			Pictured below is four copies of the same image using different pixel sampling methods and supersampling rates. AT 1 sample per pixel, the differences between nearest-neighbor and bilinear pixel sampling aren't too hard to spot, espectially if you zoom in on the left edge of the campinele. When we increase the number of samples per pixel to 16, however, the difference is nearly imperceptible (even under the pixel inspector), going to show how using a more computationally expensive and "better" pixel sampling method does not always result in noticeably higher quality image. This means that, in certain situations, bilinear pixel sampling may not be worth it over simpler, less precise approaches to texture sampling.
 
 
 			<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
