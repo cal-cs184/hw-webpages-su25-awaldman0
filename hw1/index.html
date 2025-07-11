@@ -114,7 +114,7 @@
 
 			<p>Finally, I changed <code>RasterizerImp::resolve_to_framebuffer()</code> such that for each pixel <code>(x, y)</code>, the function iterated through each sub-pixel sample, adding up the red, green, and blue componenets of the color stored at that location in <code>sample_buffer</code>. The function then divides the sums by the number of samples to obtain the average values of the red, green, and blue componenets of a particular pixel. Lastly, these average values are converted to 8-bit values and passed into <code>rgb_framebuffer_target</code>.</p>
 
-			<p>The results of using supersampling in my rasterizer can be seen below, as the edges look much smoother when the sampling rate is higher. Supersampling allows the rasterizer also performs much better when it comes to displaying very thin pieces of geometry, as it no longer leaves a pixel totally blank when a triangle does not happen to overlap with its center.</p>
+			<p>The results of using supersampling in my rasterizer can be seen below, as the edges look much smoother when the sampling rate is higher. Supersampling helps the rasterizer perform much better when it comes to displaying very thin pieces of geometry, as it no longer leaves a pixel totally blank when a triangle does not happen to overlap with its center.</p>
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -152,13 +152,13 @@
 			<h2>Task 4: Barycentric coordinates</h2>
 			While having the ability to draw single-color triangles is nice, being able to represent a wide range of values (whether it be color data, texture data, normals, etc.) within a single triangle is very imporant in computer graphics. Up until now, my rasterizer was not equipped to handle that. I implemented this functionality by associating color data (in this case) with each vertex in a triangle and used interpolation to inform the rasterizer how to color all of the other pixels in the triangle. Smooth interpolation was achieved through the use of barycentric coordinates.
 
-			In the barycentric coordinate system, each vertex in the triangle is associated with a point <code>(&alpha;, &beta;, &gamma;)</code>. Vertex A is located at <code>(1, 0, 0)</code>, vertex B is located at <code>(0, 1, 0)</code>, and vertex C is located at <code>(0, 0, 1)</code>. An arbitrary point <code>(&alpha, &beta, &gamma)</code> represents a linear interpolation between all 3 vertices at once, and can be converted back to regular coordinates with the following formula: \( (x, y) = &alpha; * A + &beta; * B + &gamma; * C; \), where \(&alpha; + &beta; + &gamma; = 1)\.
-			Likewise, we can use this formula to linearly interpolate color data associated with each vertex: \( C<sub>(x, y)</sub> = &alpha; * C<sub>A</sub> + &beta; * C<sub>B</sub> + &gamma; * C<sub>C</sub>; \). Values for &alpha;, &beta;, and &gamma; can be derived using the positions of the vertices and the current position using the equaitons below.
+			In the barycentric coordinate system, each vertex in the triangle is associated with a point <code>(&alpha;, &beta;, &gamma;)</code>. Vertex A is located at <code>(1, 0, 0)</code>, vertex B is located at <code>(0, 1, 0)</code>, and vertex C is located at <code>(0, 0, 1)</code>. An arbitrary point <code>(&alpha;, &beta;, &gamma;)</code> represents a linear interpolation between all 3 vertices at once, and can be converted back to regular coordinates with the following formula: \( (x, y) = &alpha; * A + &beta; * B + &gamma; * C; \), where \( &alpha; + &beta; + &gamma; = 1 \).
+			Likewise, we can use this formula to linearly interpolate color data associated with each vertex: \( C<sub>(x, y)</sub> = &alpha; * C<sub>A</sub> + &beta; * C<sub>B</sub> + &gamma; * C<sub>C</sub> \). Values for &alpha;, &beta;, and &gamma; can be derived using the positions of the vertices and the current position using the equations below.
 			<figure>
 				<img src="./images/formulas.png" width="600px" />
 			</figure>
 
-			All I needed to do was apply these formulas for every sample inside a given triangle to smoothly interpolate bewteen colors, allowing me to represent color gradients. As a result, I was able to mostly reuse my implementation from Task 2, being sure to modify the code where I assign a color to the current location in <code>sample_buffer</code>.
+			All I needed to do was apply these formulas for every sample inside a given triangle, allowing me to represent color gradients. As a result, I was able to mostly reuse my implementation from Task 2, being sure to modify the code where I assign a color to the current location in <code>sample_buffer</code>.
 			<figure>
 				<img src="./images/screenshot_7-9_0-18-4.png" width="400px" />
 				<figcaption>Triangle where vertices are colored red, green, and blue respectively</figcaption>
@@ -171,8 +171,18 @@
 			</figure>
 
 			<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			In computer graphics, pixel sampling involves getting color data for a specific pixel by sampling an image/texture at a position that properly cooresponds to the pixels position. When pixel sampling, one must convert between <code>(x, y)</code> position coordinates and <code>(u, v)</code>texture coordinates to ensure that we are sampling the texture at the correct location. In our case, each vertex of a particular triangle is associated with a <code>(u, v)</code> coordinate. It is our job to figure out where to sample the texture for the rest of the point in the triangle. As before, this requires interpolating bewteen the three <code>(u, v)</code> coordinates we are given, so I once again used barycentric coordinates for calculate the proper texture coordinates for each sample. As a result, my solution for this task looks extremely similar to my implementation for task 4. The code for <code>rasterize_textured_triangle</code> largely followed the structure of <code>rasterize_interpolated_color_triangle</code> with two key differences:
 
+			<ol>
+				<li>
+					When swapping the values of <code>(x1, y1) </code> and <code>(x2, y2)</code> if vertices are passed into the fucntion in clockwise winding order, it is extremely important to also swap the values for <code>(u1, v1) </code> and <code>(u2, v2)</code>. If this is not done, the texture will be mirrored for triangles whose vertices were originally in clockwise winding order, leading to a very ugly "sharding" effect a textured image. Upon realizing this, I updated my implementation of <code>rasterize_interpolated_color_triangle</code> to properly swap colors around in the event of a clockwise winding order, as that would leading to similar errors that I was lucky enough to not run into yet.
+				</li>
+				<li>
+					When assigning a color to the current sample, I needed to call either <code>sample_nearest</code> or <code>sample_bilinear</code> depending on the current pixel sampling mode.
+				</li>
+			</ol>
+
+			This rasterizer supports two different ways of sampling pixels, nearest-neighbor and bilinear sampling. Since the mapping of screen-sapce to texture space is rarely 1:1 and we need to support things like sub-pixel sampling, <code>(u, v)</code> texture coordinates that we derive from screen-space positions are very unlikely to be whole numbers. We need whole numbers in order to get color data from the <code>texels</code> vector, however, so we need to find a way to convert our floating point <code>(u, v)</code> values to color data. The first method, which I implemented in <code>sample_nearest</code> simply rounds u and v to the closest whole number and uses them to sample from the texture. This works, but it can lead to a more pixelated look in the final image. The other method, which I implemented in <code>sample_linear</code>, first samples the four texels <b>closest</b> to u and v before performing a series of linear interpolations to determine the appropriate color at <code>(u, v)</code>. While more computationally expensive, this results in a smoother image than nearest neighbor pixel sampling.
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -187,6 +197,9 @@
 					</tr>
 				</table>
 			</div>
+
+			<p>The difference between the two pixel sampling methods is extremely apparant in the images above. Bilinear sampling is clearly preferable in this case, as it makes the text on the seal much more legible by smoothing out color differences. </p>
+			Pictured below is the same image using different pixel sampling methods and supersampling rates. AT 1 sample per pixel, the differences between nearest-neighbor and bilinear pixel sampling aren't too hard to spot, espectially if you zoom in on the left edge of the campinele. When we increase the number of samples per pixel to 16, however, the difference is nearly imperceptible (even under the pixel inspector), going to show how using a more computationally expensive and "better" pixel sampling method does not always result in noticeably higher quality image. This means that, in certain situations, bilinear pixel sampling may not be worth it over simpler, less precise approaches to texture sampling.  
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
