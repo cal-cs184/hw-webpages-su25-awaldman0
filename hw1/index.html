@@ -150,13 +150,20 @@
 			</figure>
 
 			<h2>Task 4: Barycentric coordinates</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			While having the ability to draw single-color triangles is nice, being able to represent a wide range of values (whether it be color data, texture data, normals, etc.) within a single triangle is very imporant in computer graphics. Up until now, my rasterizer was not equipped to handle that. I implemented this functionality by associating color data (in this case) with each vertex in a triangle and used interpolation to inform the rasterizer how to color all of the other pixels in the triangle. Smooth interpolation was achieved through the use of barycentric coordinates.
 
+			In the barycentric coordinate system, each vertex in the triangle is associated with a point <code>(&alpha;, &beta;, &gamma;)</code>. Vertex A is located at <code>(1, 0, 0)</code>, vertex B is located at <code>(0, 1, 0)</code>, and vertex C is located at <code>(0, 0, 1)</code>. An arbitrary point <code>(&alpha, &beta, &gamma)</code> represents a linear interpolation between all 3 vertices at once, and can be converted back to regular coordinates with the following formula: \( (x, y) = &alpha; * A + &beta; * B + &gamma; * C; \), where \(&alpha; + &beta; + &gamma; = 1)\.
+			Likewise, we can use this formula to linearly interpolate color data associated with each vertex: \( C<sub>(x, y)</sub> = &alpha; * C<sub>A</sub> + &beta; * C<sub>B</sub> + &gamma; * C<sub>C</sub>; \). Values for &alpha;, &beta;, and &gamma; can be derived using the positions of the vertices and the current position using the equaitons below.
+			<figure>
+				<img src="./images/formulas.png" width="600px" />
+			</figure>
+
+			All I needed to do was apply these formulas for every sample inside a given triangle to smoothly interpolate bewteen colors, allowing me to represent color gradients. As a result, I was able to mostly reuse my implementation from Task 2, being sure to modify the code where I assign a color to the current location in <code>sample_buffer</code>.
 			<figure>
 				<img src="./images/screenshot_7-9_0-18-4.png" width="400px" />
 				<figcaption>Triangle where vertices are colored red, green, and blue respectively</figcaption>
 			</figure>
-
+			The above image is a good example of how barycentric coordinates can be used to interpolate values within a triangle. When passing the data for this triangle into <code>rasterize_interpolated_color_triangle()</code>, only the vertices had any explicity defined color data, with vertex A, B, and C being colored red, green, and blue respectively. The color for every other pixel is some linear combination of the other three colors, and the use of barycentric coordinates allow for smooth interpolation between all three colors at once. After applying this concept to a single triangle, I was able to rasterize the image below, whose triangles corresponding color data combine to create a color wheel.
 
 			<figure>
 				<img src="./images/screenshot_7-9_0-17-51.png" width="400px" />
@@ -185,21 +192,21 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-10_0-35-38.png" width="600px" />
+							<img src="./images/screenshot_7-10_0-35-38.png" width="750px" />
 							<figcaption>Nearest sampling at 1 sample per pixel</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-10_0-35-46.png" width="600px" />
+							<img src="./images/screenshot_7-10_0-35-46.png" width="750px" />
 							<figcaption>Nearest sampling at 16 samples per pixel</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-10_0-36-13.png" width="600px" />
+							<img src="./images/screenshot_7-10_0-36-13.png" width="750px" />
 							<figcaption>Bilinear sampling at 1 sample per pixel</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-10_0-36-21.png" width="600px" />
+							<img src="./images/screenshot_7-10_0-36-21.png" width="750px" />
 							<figcaption>Bilinear sampling at 16 samples per pixel</figcaption>
 						</td>
 					</tr>
