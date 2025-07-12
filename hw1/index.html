@@ -69,7 +69,7 @@
 			Pictured below is a <i>png</i> screenshot of my rasterizer displaying <i>basic/test4.svg</i> with the default viewing parameters with the pixel inspector hovering over an area close to the corner of a very thin triangle.
 
 			<figure>
-				<img src="./images/screenshot_7-7_20-5-30.png" alt="basic/test4.svg" style="width:400px" />
+				<img src="./images/screenshot_7-7_20-5-30.png" alt="basic/test4.svg" style="width:550px" />
 				<figcaption>Rasterization of <i>basic/test4.svg</i> without utilizing any antialiasing techniques.</figcaption>
 			</figure>
 
@@ -120,21 +120,21 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-8_18-23-37.png" width="400px" />
+							<img src="./images/screenshot_7-8_18-23-37.png" width="550px" />
 							<figcaption>Supersample rate 1 per pixel</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-8_18-23-39.png" width="400px" />
+							<img src="./images/screenshot_7-8_18-23-39.png" width="550px" />
 							<figcaption>Supersample rate 4 per pixel</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-8_18-23-41.png" width="400px" />
+							<img src="./images/screenshot_7-8_18-23-41.png" width="550px" />
 							<figcaption>Supersample rate 9 per pixel</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-8_18-23-43.png" width="400px" />
+							<img src="./images/screenshot_7-8_18-23-43.png" width="550px" />
 							<figcaption>Supersample rate 16 per pixel</figcaption>
 						</td>
 					</tr>
@@ -145,7 +145,7 @@
 			After properly implementing transformations, I was able to employ scaling, translation, and rotation operations to alter <i>robot.svg</i> and create something new. I decided to try to make cubeman do some yoga, which I figured would require using all of the transformations I just coded in order to make the pose look right. The screenshot below depicts cubeman in tree pose.
 
 			<figure>
-				<img src="./images/screenshot_7-8_19-48-41.png" width="400px" />
+				<img src="./images/screenshot_7-8_19-48-41.png" width="550px" />
 				<figcaption>Cubeman doing yoga</figcaption>
 			</figure>
 
@@ -160,13 +160,13 @@
 
 			All I needed to do was apply these formulas for every sample inside a given triangle, allowing me to represent color gradients. As a result, I was able to mostly reuse my implementation from Task 2, being sure to modify the code where I assign a color to the current location in <code>sample_buffer</code>.
 			<figure>
-				<img src="./images/screenshot_7-9_0-18-4.png" width="400px" />
+				<img src="./images/screenshot_7-9_0-18-4.png" width="550px" />
 				<figcaption>Triangle where vertices are colored red, green, and blue respectively</figcaption>
 			</figure>
 			The above image is a good example of how barycentric coordinates can be used to interpolate values within a triangle. When passing the data for this triangle into <code>rasterize_interpolated_color_triangle()</code>, only the vertices had any explicity defined color data, with vertex A, B, and C being colored red, green, and blue respectively. The color for every other pixel is some linear combination of the other three colors, and the use of barycentric coordinates allow for smooth interpolation between all three colors at once. After applying this concept to a single triangle, I was able to rasterize the image below, whose triangles corresponding color data combine to create a color wheel.
 
 			<figure>
-				<img src="./images/screenshot_7-9_0-17-51.png" width="400px" />
+				<img src="./images/screenshot_7-9_0-17-51.png" width="550px" />
 				<figcaption>Rasterization of <i>basic/test7.svg</i> with default viewing parameters and supersampling rate 1</figcaption>
 			</figure>
 
@@ -187,11 +187,11 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-10_0-41-0.png" width="400px" />
+							<img src="./images/screenshot_7-10_0-41-0.png" width="550px" />
 							<figcaption>Swirled Cal seal with nearest-pixel sampling</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-10_0-41-1.png" width="400px" />
+							<img src="./images/screenshot_7-10_0-41-1.png" width="550px" />
 							<figcaption>Swirled Cal seal with bilinear sampling</figcaption>
 						</td>
 					</tr>
@@ -251,17 +251,17 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-11_18-39-1.png" width="400px" />
+							<img src="./images/screenshot_7-11_18-39-1.png" width="550px" />
 							<figcaption>L_ZERO level sampling</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-11_18-39-2.png" width="400px" />
+							<img src="./images/screenshot_7-11_18-39-2.png" width="550px" />
 							<figcaption>L_NEAREST level sampling</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-11_18-39-3.png" width="400px" />
+							<img src="./images/screenshot_7-11_18-39-3.png" width="550px" />
 							<figcaption>L_LINEAR level sampling</figcaption>
 						</td>
 					</tr>
@@ -269,7 +269,8 @@
 				</table>
 			</div>
 
-			Now that my rasterizer is capable of producing textured images with a variety of pixel sampling/level sampling methods at multiple numbers of samples per pixel, it is worth mentioning the advantages and tradeoffs of using various combinations of these antialiasing techniques. When it comes to speed it's pretty clear that having more samples per pixel and using interpolation based pixel and level sampling methods are simply not as fast as the other options. A high supersampling rate means the rasterizer needs to iterate through and <b>store</b> a mich higher volume of samples, which clearly causes a slowdown and eats up more memory since the size of <code>sample_buffer</code> needs to be scaled accordingly. Bilinear pixel/level sampling are slower than their nearest-neighbor counterparts because many more calculations need to be performed per-pixel to interpolate between values. Despite the slowdown, bilinear sampling methods clearly give the user more antialiasing power, as they can offer a more accurate/smooth approximation of the color at a specific coordinate when compared to nearest neighbor sampling (as seen in Part 5). When used in conjunction, high supersampling rates and bilinear pixel/level sampling give the user a ton of antialiasing power, but one must be wary of things like overblur, where an image is antialiased to such an extent that the whole image loses detail. Using a picture of Custer Gallatin National Forest (<a href="https://insideclimatenews.org/news/07042023/logging-deforestation-custer-gallatin-national-forest/">source</a>), I will test four different combinations of pixel and level sampling methods and compare their performances (supersample rate 1 per pixel).
+			<p>Now that my rasterizer is capable of producing textured images with a variety of pixel sampling/level sampling methods at multiple numbers of samples per pixel, it is worth mentioning the advantages and tradeoffs of using various combinations of these antialiasing techniques. When it comes to speed it's pretty clear that having more samples per pixel and using interpolation based pixel and level sampling methods are simply not as fast as the other options. A high supersampling rate means the rasterizer needs to iterate through and <b>store</b> a mich higher volume of samples, which clearly causes a slowdown and eats up more memory since the size of <code>sample_buffer</code> needs to be scaled accordingly. Bilinear pixel/level sampling are slower than their nearest-neighbor counterparts because many more calculations need to be performed per-pixel to interpolate between values. Despite the slowdown, bilinear sampling methods clearly give the user more antialiasing power, as they can offer a more accurate/smooth approximation of the color at a specific coordinate when compared to nearest neighbor sampling (as seen in Part 5). When used in conjunction, high supersampling rates and bilinear pixel/level sampling give the user a ton of antialiasing power, but one must be wary of things like overblur, where an image is antialiased to such an extent that the whole image loses detail. Using a picture of Custer Gallatin National Forest (<a href="https://insideclimatenews.org/news/07042023/logging-deforestation-custer-gallatin-national-forest/">source</a>), I will test four different combinations of pixel and level sampling methods and compare their performances (supersample rate 1 per pixel).</p>
+			
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -284,11 +285,11 @@
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-11_19-19-57.png" width="750px" />
+							<img src="./images/screenshot_7-11_19-33-5.png" width="750px" />
 							<figcaption>Bilinear level sampling and nearest pixel sampling</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="./images/screenshot_7-11_19-20-2.png" width="750px" />
+							<img src="./images/screenshot_7-11_19-33-6.png" width="750px" />
 							<figcaption>Bilinear level sampling and nearest pixel sampling (trilinear sampling/texture filtering)</figcaption>
 						</td>
 					</tr>
