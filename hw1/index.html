@@ -36,15 +36,14 @@
 
 			<br>
 
-			Link to GitHub repository: <a href="https://github.com/cal-cs184/hw-webpages-su25-awaldman0">github.com/cal-cs184/hw-webpages-su25-awaldman0</a>
+			Link to GitHub repository: <a href="https://github.com/cal-cs184/hw-rasterizer-swiss-cheese">github.com/cal-cs184/hw-rasterizer-swiss-cheese</a>
 
 			<!--
 	We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 	-->
 
 			<h2>Overview</h2>
-			Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
-
+			<p>In this homework, I implemented many important features of a software rasterizer, including drawing triangles, antialiasing via supersampling, transformations, interpolation within a triangle via barycentric coordinates, texture mapping, and various methods of pixel sampling and level sampling to improve how my program handles textures. Considering the relative simplicity of what I've built, I'm pretty suprised at how powerful/capable my rasterizer is, mainly when it comes to the effectiveness of the antialiasing techniques I implemented. I've gained a much deeper understanding how how geometry is reprsented in code and computers can be leveraged to do the heavy lifting in the rasterization process. More specifically, I'm impressed when it comes to all of the interpolation that is done in order to represent things like colors and textures in a triangle. Above all else, I'm shocked at the speed of computers and the sheer number of operations per second being done to dsplay an image on screen, especially as you increase the number of samples per pixel. I found myself very intrigued by the whole texturing process and the different methods of sampling texels and mipmap levels. I'd love to continue exploring that as the class continues and see how all of the concepts I've learned extend to 3D.</p>
 			<h2>Task 1: Drawing Single-Color Triangles</h2>
 			When rasterizing triangles for this task, my goal was to take point data and appropriately translate it into graphical data that appears on screen. In doing so, I would use the color data passed into <code>RasterizerImp::rasterize_triangle()</code> to fill in
 			the triangle I was working with. While rasterizing a single triangle does not look very impressive, repeated calls to the function allows me to display a great deal of triangles on screen, giving my rasterizer the ability to represent fairly intricate and
@@ -152,8 +151,8 @@
 			<h2>Task 4: Barycentric coordinates</h2>
 			While having the ability to draw single-color triangles is nice, being able to represent a wide range of values (whether it be color data, texture data, normals, etc.) within a single triangle is very imporant in computer graphics. Up until now, my rasterizer was not equipped to handle that. I implemented this functionality by associating color data (in this case) with each vertex in a triangle and used interpolation to inform the rasterizer how to color all of the other pixels in the triangle. Smooth interpolation was achieved through the use of barycentric coordinates.
 
-			In the barycentric coordinate system, each vertex in the triangle is associated with a point <code>(&alpha;, &beta;, &gamma;)</code>. Vertex A is located at <code>(1, 0, 0)</code>, vertex B is located at <code>(0, 1, 0)</code>, and vertex C is located at <code>(0, 0, 1)</code>. An arbitrary point <code>(&alpha;, &beta;, &gamma;)</code> represents a linear interpolation between all 3 vertices at once, and can be converted back to regular coordinates with the following formula: \( (x, y) = &alpha; * A + &beta; * B + &gamma; * C; \), where \( &alpha; + &beta; + &gamma; = 1 \).
-			Likewise, we can use this formula to linearly interpolate color data associated with each vertex: \( C<sub>(x, y)</sub> = &alpha; * C<sub>A</sub> + &beta; * C<sub>B</sub> + &gamma; * C<sub>C</sub> \). Values for &alpha;, &beta;, and &gamma; can be derived using the positions of the vertices and the current position using the equations below.
+			In the barycentric coordinate system, each vertex in the triangle is associated with a point <code>(&alpha;, &beta;, &gamma;)</code>. Vertex A is located at <code>(1, 0, 0)</code>, vertex B is located at <code>(0, 1, 0)</code>, and vertex C is located at <code>(0, 0, 1)</code>. An arbitrary point <code>(&alpha;, &beta;, &gamma;)</code> represents a linear interpolation between all 3 vertices at once, and can be converted back to regular coordinates with the following formula: \( (x, y) = &alpha; * A + &beta; * B + &gamma; * C \), where \( &alpha; + &beta; + &gamma; = 1 \).
+			Likewise, we can use this formula to linearly interpolate color data associated with each vertex /( C<sub>(x, y)</sub> = &alpha; * C<sub>A</sub> + &beta; * C<sub>B</sub> + &gamma; * C<sub>C</sub> \). Values for &alpha;, &beta;, and &gamma; can be derived using the positions of the vertices and the current position using the equations below.
 			<figure>
 				<img src="./images/formulas.png" width="600px" />
 			</figure>
@@ -295,6 +294,7 @@
 					</tr>
 				</table>
 			</div>
+			<p>When looking at the images above, I find that using bilinear level sampling and nearest pixel sampling provides the best overall result for this image. Looking at the images that use nearest level sampling, the bourdaries where adjacent mipmap levels are being used is pretty apparant and looks unappealing. If you looks at the center of the image and starts scanning outwards, there are definite jumps in how pixelated the image looks. Each of these jumps represent my rasterizer using a different mipmap level to texture the image. Additionally, the bilinear pixel sampling used in the top right image seems to add a bit of extra blur, making the change in texture resolution especially visible around the edges of the image. Next, we can examine bottom two images, which use bilinear level sampling. You aren't able to see the transitions bewteen mipmap levels, which is very nice. It seems the image on the bottom right is suffering from a bit of overblur though, which is made evident if you look at the pixel inspector. The image using nearest pixel sampling retains the details of the tops of the trees and the hill in the background but the image using trilinear sampling totally loses those details. As a result, I feel the image that uses bilinear level sampling and nearest pixel sampling does the best job representing this forest landscape. </p>
 		</div>
 	</body>
 </html>
