@@ -225,14 +225,75 @@
 				</table>
 			</div>
 
-			<p>Pictured above is four copies of the same image using different pixel sampling methods and supersampling rates. AT 1 sample per pixel, the differences between nearest-neighbor and bilinear pixel sampling aren't too hard to spot, espectially if you zoom in on the left edge of the campinele. When we increase the number of samples per pixel to 16, however, the difference is nearly imperceptible (even under the pixel inspector), going to show how using a more computationally expensive and "better" pixel sampling method does not always result in noticeably higher quality image. This means that, in certain situations, bilinear pixel sampling may not be worth it over simpler, less precise approaches to texture sampling.</p>
-
+			<p>Pictured above is four copies of the same image using different pixel sampling methods and supersampling rates. AT 1 sample per pixel, the differences between nearest-neighbor and bilinear pixel sampling aren't too hard to spot, espectially if you zoom in on the left edge of the campinele. When we increase the number of samples per pixel to 16, however, the difference is nearly imperceptible (even under the pixel inspector), going to show how using a more computationally expensive and "better" pixel sampling method does not always result in noticeably higher quality image. This means that, in certain situations, bilinear pixel sampling may not be worth it over simpler, less precise approaches to texture sampling. In general, We will see large differences bewteen bilinear and nearest neighbor sampling when the number of samples per pixel is small because bilinear filtering allows us to represent the color at a given <code>(u, v)</code> coordinate better than nearest neighbor due to the interpolation that takes place in bilinear filtering. At higher sampling rates, nearest neightbor interpolation will wind up sampling mulitple different texels before the color values are averaged out in the framebuffer, mimicking the smoothing effect bilinear interpolation tends to have. As a result, the differences bewteen the two methods are very difficult to spot at high smapling rates.</p>
 
 			<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			When sampling textures in computer graphics, there will most likely not be a 1:1 pixel to texel mapping. This can lead to undesirable outcomes in situations where a low resolution texture is being sampled at a high rate (too blurry) or a high resolution texture is being sampled at a low rate (leads to aliasing). This problem can be especially difficult when the exact same texture is being sampled by triangles at different distances from the camera. One way of solving is this is by creating a mipmap composed of the different versions of same texture, each one sampled at a lower resolution than the last. When it comes time to texturing a specific pixel, one can calculate the local sampling rate by finding the rate of change of u and v around the current pixel. You can then use the formulas below to calculate the mipmap level that corresponds to the local sampling rate.
+			<figure>
+				<img src="./images/formulas2.png" width="600px" />
+			</figure>
+			From here, you can implement things like nearest neighbor or bilinear interpolation to help the rasterizer choose the correct resolution level when sampling a texture. This is called level sampling. In order to implement this myself, I first needed to edit <code>rasterize_textured_triangle</code> to call <code>sample</code>, a more generalized texture sampling function that would take care of level sampling as well as pixel sampling for our texture. I also had to calculate the uv barycentric coordinates of <code>(x+1,y)</code> and <code>(x,y+1)</code> in <code>rasterize_textured_triangle</code>, which were crucial for finding the proper mipmap level. I then implemented <code>get_level</code> (a helper function for <code>sample</code>) according to the spec, which would perform the math shown above to find the mipmap level D that corresponds to a particular <code>(u, v)</code> coordinate. Lastly, I implemented <code>sample</code>, which makes a call to the appropriate sampling function using the correct level given the currently selected pixel sampling and level sampling methods.
 
-			<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<p>The three leveling methods I implemented are the following</p>
+			<ol>
+				<li>
+					L_ZERO: sample from the 0th level of the mipmap
+				</li>
+				<li>
+					L_NEAREST: round the level returned by <code>get_level</code> to the nearest integer and use that to sample the mipmap.
+				</li>
+				<li>
+					L_LINEAR: sample the two levels closest to the value return by <code>get_level</code> and linearly interpolate bewteen them to determine the color of a pixel.
+				</li>
+			</ol>
+			Pictured below are examples of all three methods with nearest pixel sampling and a supersampling rate of 1.
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="./images/screenshot_7-11_18-39-1.png" width="400px" />
+							<figcaption>L_ZERO level sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="./images/screenshot_7-11_18-39-2.png" width="400px" />
+							<figcaption>L_NEAREST level sampling</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="./images/screenshot_7-11_18-39-3.png" width="400px" />
+							<figcaption>L_LINEAR level sampling</figcaption>
+						</td>
+					</tr>
+
+				</table>
+			</div>
+
+			Now that my rasterizer is capable of producing textured images with a variety of pixel sampling/level sampling methods at multiple numbers of samples per pixel, it is worth mentioning the advantages and tradeoffs of using various combinations of these antialiasing techniques. When it comes to speed it's pretty clear that having more samples per pixel and using interpolation based pixel and level sampling methods are simply not as fast as the other options. A high supersampling rate means the rasterizer needs to iterate through and <b>store</b> a mich higher volume of samples, which clearly causes a slowdown and eats up more memory since the size of <code>sample_buffer</code> needs to be scaled accordingly. Bilinear pixel/level sampling are slower than their nearest-neighbor counterparts because many more calculations need to be performed per-pixel to interpolate between values. Despite the slowdown, bilinear sampling methods clearly give the user more antialiasing power, as they can offer a more accurate/smooth approximation of the color at a specific coordinate when compared to nearest neighbor sampling (as seen in Part 5). When used in conjunction, high supersampling rates and bilinear pixel/level sampling give the user a ton of antialiasing power, but one must be wary of things like overblur, where an image is antialiased to such an extent that the whole image loses detail. Using a picture of Custer Gallatin National Forest (<a href="https://insideclimatenews.org/news/07042023/logging-deforestation-custer-gallatin-national-forest/">source</a>), I will test four different combinations of pixel and level sampling methods and compare their performances (supersample rate 1 per pixel).
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="./images/screenshot_7-11_19-19-39.png" width="750px" />
+							<figcaption>Nearest level sampling and nearest pixel sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="./images/screenshot_7-11_19-19-48.png" width="750px" />
+							<figcaption>Nearest level sampling and bilinear pixel sampling</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="./images/screenshot_7-11_19-19-57.png" width="750px" />
+							<figcaption>Bilinear level sampling and nearest pixel sampling</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="./images/screenshot_7-11_19-20-2.png" width="750px" />
+							<figcaption>Bilinear level sampling and nearest pixel sampling (trilinear sampling/texture filtering)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
 		</div>
 	</body>
 </html>
