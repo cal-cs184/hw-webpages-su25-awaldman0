@@ -285,16 +285,16 @@
 					<tr>
 						<td style="text-align: center;">
 							<img src="./images/screenshot_7-11_19-33-5.png" width="400px" />
-							<figcaption>Bilinear level sampling and nearest pixel sampling</figcaption>
+							<figcaption>Linear level sampling and nearest pixel sampling</figcaption>
 						</td>
 						<td style="text-align: center;">
 							<img src="./images/screenshot_7-11_19-33-6.png" width="400px" />
-							<figcaption>Bilinear level sampling and nearest pixel sampling (trilinear sampling/texture filtering)</figcaption>
+							<figcaption>Linear level sampling and bilinear pixel sampling (trilinear sampling/texture filtering)</figcaption>
 						</td>
 					</tr>
 				</table>
 			</div>
-			<p>When looking at the images above, I find that using bilinear level sampling and nearest pixel sampling provides the best overall result for this image. Looking at the images that use nearest level sampling, the bourdaries where adjacent mipmap levels are being used is pretty apparant and looks unappealing. If you looks at the center of the image and starts scanning outwards, there are definite jumps in how pixelated the image looks. Each of these jumps represent my rasterizer using a different mipmap level to texture the image. Additionally, the bilinear pixel sampling used in the top right image seems to add a bit of extra blur, making the change in texture resolution especially visible around the edges of the image. Next, we can examine bottom two images, which use bilinear level sampling. You aren't able to see the transitions bewteen mipmap levels, which is very nice. It seems the image on the bottom right is suffering from a bit of overblur though, which is made evident if you look at the pixel inspector. The image using nearest pixel sampling retains the details of the tops of the trees and the hill in the background but the image using trilinear sampling totally loses those details. As a result, I feel the image that uses bilinear level sampling and nearest pixel sampling does the best job representing this forest landscape. </p>
+			<p>When looking at the images above, I find that using linear level sampling and nearest pixel sampling provides the best overall result for this image. Looking at the images that use nearest level sampling, the bourdaries where adjacent mipmap levels are being used is pretty apparant and looks unappealing. If you looks at the center of the image and starts scanning outwards, there are definite jumps in how pixelated the image looks. Each of these jumps represent my rasterizer using a different mipmap level to texture the image. Additionally, the bilinear pixel sampling used in the top right image seems to add a bit of extra blur, making the change in texture resolution especially visible around the edges of the image. Next, we can examine bottom two images, which use linear level sampling. You aren't able to see the transitions bewteen mipmap levels, which is very nice. It seems the image on the bottom right is suffering from a bit of overblur though, which is made evident if you look at the pixel inspector. The image using nearest pixel sampling retains the details of the tops of the trees and the hill in the background but the image using trilinear sampling totally loses those details. As a result, I feel the image that uses linear level sampling and nearest pixel sampling does the best job representing this forest landscape. </p>
 		</div>
 	</body>
 </html>
