@@ -54,42 +54,79 @@
 
 			<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
 			In Homework 1, we displayed the ability to draw objects to the screen through the use of points, lines, and triangles. We were even able to mimic curved shapes by drawing lots of lines/triangles oriented at slightly different angles, giving the appearance of a continuous curve despite its piecewise nature. As mentioned in lecture, however, things like camera paths, object modeling, vector fonts, and CAD design necessitate geometry that is truly smooth in order to function properly. We can acheive the ability to represent smooth curves by employing bézier curves, a type of geometry defined by a number of control points (and parameterized by a value <i>t</i>) that allow us to mathematically derive natural-looking curves that can be scaled infinitely without losing fidelity. In order to get from a list of control points to a curve that can be displayed on screen, we can apply the de Casteljau algorithm for evaluating bézier curves.
-			<p>To evaluate a point on a bézier curve with <i>n</i>located at point <i>t</i> (0≤<i>t</i>≤1)</p>
+			<p>To evaluate a point on a bézier curve with <i>n</i> control points located at point <i>t</i> (0 ≤ <i>t</i> ≤ 1)</p>
 			<ol>
 				<li>
 					Using <i>t</i>, linearly interpolate between each consecutive pair of control points, resulting in <i>n-1</i> intermediate control points.
 				</li>
 				<li>
-					Repeat step 1 with the intermediate control points, creating a new set of intermediate control points.
+					Repeat step 1 with the intermediate control points, creating another set of intermediate control points.
 				</li>
 				<li>
 					Recursively interpolate until you are left with a single point. This point is located on the curve.
 				</li>
 			</ol>
 			When it came to implementing Part 1, I coded <code>BezierCurve::evaluateStep()</code>, which executes the recursive step of de Casteljau's algorithm. I did this by looping through <code>points</code> and returning a new vector of points called <code>result</code> that contains the interpolated control points.
-			
-			<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-			
+
+			<p>With the recursive step of de Casteljau implemented, I can now display the full process of evaluating a point on a bézier curve.</p>
+
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="teapot.png" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="images/task1_1.png" width="400px" />
+							<figcaption>Original control points</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="teapot.png" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="images/task1_2.png" width="400px" />
+							<figcaption>Evaluation step 1</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="teapot.png" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="images/task1_3.png" width="400px" />
+							<figcaption>Evaluation step 2</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="teapot.png" width="400px" />
-							<figcaption>Caption goes here.</figcaption>
+							<img src="images/task1_4.png" width="400px" />
+							<figcaption>Evaluation step 3</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/task1_5.png" width="400px" />
+							<figcaption>Evaluation step 4</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/task1_6.png" width="400px" />
+							<figcaption>Final evaluated point with completed bézier curve.</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<p>Now that we can evaluate a specific point along the curve with de Casteljau, we can vary the value of <i>t</i> and see the effects it has on the intermediate evaluation steps.</p> 
+
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/task1_7.png" width="400px" />
+							<figcaption><i>t</i> ≈ 0.2</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/task1_8.png" width="400px" />
+							<figcaption><i>t</i> ≈ 0.4</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/task1_9.png" width="400px" />
+							<figcaption><i>t</i> ≈ 0.6</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/task1_10.png" width="400px" />
+							<figcaption><i>t</i> ≈ 0.8</figcaption>
 						</td>
 					</tr>
 				</table>
