@@ -105,7 +105,7 @@
 				</table>
 			</div>
 
-			<p>Now that we can evaluate a specific point along the curve with de Casteljau, we can vary the value of <i>t</i> and see the effects it has on the intermediate evaluation steps.</p> 
+			<p>Now that we can evaluate a specific point along the curve with de Casteljau, we can vary the value of <i>t</i> and see the effects it has on the intermediate evaluation steps.</p>
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -133,7 +133,30 @@
 			</div>
 
 			<h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			At the moment, our mesh editor is capable of rendering smooth curves in 2 dimensions, but we want to be able to represent smooth surfaces in 3D. This means we need to add support for bézier surfaces. Currently, my implementation of de Casteljau only works with a 1 dimensional array of control points. In order to extend things to 3D, we can modify it to work with an <i>n × n</i> array of control points, with each row in the array defining a bézier curve. We can then evaluate each row of control points using a parameter <i>u</i>. After doing so, we'll have <i>n</i> points that each lie on a particular curve. Those <i>n</i> points can then be used as control points for <b>another</b> bézier curve parameterized by <i>v</i>. Upon evaluating this new curve according to <i>v</i>, we will be left with a point that lies on a 3D bézier surface. With this knowledge, we can cycle through different values of <i>u</i> and <i>v</i>, allowing us to represent perfectly smooth patches of geometry in our mesh editor.
+
+			<p>To implement this myself, I had to make changes in 3 functions: <code>BezierPatch::evaluateStep()</code>, <code>BezierPatch::evaluate1D()</code>, and <code>BezierPatch::evaluate()</code>. The code for  <code>BezierPatch::evaluateStep()</code> ended up being essentially identical to the code I wrote for Part 1, the only difference being this function uses the value <i>t</i> passed into the function for interpolation rather than using a member varible of the class like before</p>
+
+			<p>For <code>BezierPatch::evaluate1D()</code> I needed to take in a vector of control points <code>points</code> and a parameter <code>t</code> and return the point that lies on the curve defined by <code>points</code>. The function works as follows</p>
+			<ol>
+				<li>Define a variable <code>curr_step</code> and set it equal to points</li>
+				<li>Enter a loop where <code>curr_step</code> is set equal to the result of <code>evaluateStep(curr_step, t)</code>, This represents one step of the de Casteljau algorithm.</li>
+				<li>If the length of <code>curr_step</code> is 1 after the call to <code>evaluate_step()</code>, return the point stored in <code>curr_step</code> because we have derived point that lies on the current bézier curve. If not, continue looping.</li>
+			</ol>
+
+			With <code>BezierPatch::evaluateStep()</code> and <code>BezierPatch::evaluate1D()</code> now implemented, I coded <code>BezierPatch::evaluate()</code> (which takes in two parameters <i>u</i> and <i>v</i>) to complete the separable 1D de Casteljau algorithm.
+			<ol>
+				<li>Define a new vector <code>control_points_v</code></li>
+				<li>Loop through each row of <code>this->control_points</code>, pushing the result of <code>evaluate1D(this->controlPoints[i], u)</code> to the back of <code>control_points_v</code>.</li>
+				<li>After looping through each row of control points, return the result of <code>evaluate1D(control_pts_v, v)</code>, as this represents the final evaluated point on the bézier surface</li>
+			</ol>
+
+			Now that I can represent smooth patches of 3D geometry, my mesh editor is able to display 3D meshes!
+
+			<figure>
+				<img src="task2_1.png" alt="Teapot" style="width:50%" />
+				<figcaption>Screenshot of <code>bez/teapot.bez</code> evaluated by your implementation.</figcaption>
+			</figure>
 
 			<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
