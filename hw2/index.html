@@ -161,7 +161,22 @@
 			<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
 			<h3>Part 3: Area-weighted vertex normals</h3>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			The next improvement to be made in my mesh editor has to do with shading. At the moment, every triangle in a given mesh is shaded flatly, meaning each triangle has one normal vector that determines the color of every pixel inside of it. This makes it difficult to shade objects with smooth, continuous surfaces. Instead, we want to define a normal for every vertex in the mesh, which will allow us to interpolate colors/shading across the triangle using barycentric coordinates, a technique called Phong shading. This results in shading that looks much more natural than flat shading. In order to do this, I implemented area-weighted vertex normals by filling in <code>Vertex::normal</code>. My implementation works as follows:
+			<ol>
+				<li>Define a zero vector <code>result</code> that will hold the final area-weighted normal vector for this vertex.</li>
+				<li>Set <code>h</code> equal to the halfedge rooted at the current vertex.</li>
+				<li>
+					Enter a do-while loop which traverses through faces incident on the current vertex until we end up back at the halfedge rooted at this vertex.
+					<ul>
+						<li>Use halfedge traveral operations to locate the other two vertices <code>v1</code> and <code>v2</code> in the current face.</li>
+						<li>Calculate the distance bewteen this vertex and the other two vertices in the triangle. Multiply the distances together to get the area of the current face</li>
+						<li>Create two vectors, one between this vertex and <code>v1</code>, the other between <code>v1</code> and <code>v2</code> and calculate the cross product</li>
+						<li>Scale the cross product (normal vector) by the area of the face and add the vector to <code>result</code> </li>
+					</ul>
+				</li>
+				<li>Normalize <code>result</code> and return it.</li>
+			</ol>
+			Now that every vertex in a given mesh will have a unit normal vector associated with it when we enable Phong shading, we are able to vastly improve the appearance of 3D ojects, as seen below.
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -171,13 +186,19 @@
 						</td>
 						<td style="text-align: center;">
 							<img src="images/task3_2.png" width="400px" />
-							<figcaption>Teapot with Gouraud shading</figcaption>
+							<figcaption>Teapot with Phong shading enabled</figcaption>
 						</td>
 					</tr>
 				</table>
 			</div>
 			<h3>Part 4: Edge flip</h3>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			When it came to implementing edge flips, I really concerned myself with planning out all of the pointer reassignments that needed to take place so that I would not have to try to debug any confusing errors stemming from incorrect pointers. To make things easier on myself, I assumed every edge flip operation looked like the diagram below, where the halfedge associated with the edge we want to flip is rooted at vertex b:
+			<figure>
+				<img src="images/task4_graph.png" alt="Teapot" style="width:50%" />
+				<figcaption>Diagram of an edge flip operation</figcaption>
+			</figure>
+			Additionally, I split my code into distinct sections (and added plently of comments) that helped me structure each individual step of the operation because I felt it allowed me to think things through more thoroughly. In general, I grouped my pointer reassignments by face. Referring to the diagram above, I made sure to set the next, twin, vertex, edge, and face pointer for every halfedge in face ABC before dealing with the halfedges in face BCD. I also found it extremely helpful to define variables with meaningful names for the various <code>VertexIter</code>s, <code>EdgeIter</code>, and <code>HalfedgeIter</code>s I would use throughout the pointer reassignment process (ex. edge_ab, vertex_b, etc.). This coding approach along with my pre-planning helped me sucessfully implement <code>HalfedgeMesh::flipEdge()</code> without a painful debugging process. The pictures below display my mesh editor's edge flipping functionality in action.
+
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -192,6 +213,7 @@
 					</tr>
 				</table>
 			</div>
+
 			<h3>Part 5: Edge split</h3>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
