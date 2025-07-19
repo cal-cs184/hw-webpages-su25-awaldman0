@@ -39,7 +39,7 @@
 			Link to GitHub repository: <a href="https://github.com/cal-cs184/hw2-meshedit-dutch-crunch">cal-cs184/hw2-meshedit-dutch-crunch</a>
 
 			<figure>
-				<img src="teapot.png" alt="Teapot" style="width:50%" />
+				<img src="teapot.png" alt="Teapot" style="width:400px" />
 				<figcaption>You can add images with captions!</figcaption>
 			</figure>
 
@@ -154,7 +154,7 @@
 			Now that I can represent smooth patches of 3D geometry, my mesh editor is able to display 3D meshes!
 
 			<figure>
-				<img src="images/task2_1.png" alt="Teapot" style="width:50%" />
+				<img src="images/task2_1.png" alt="Teapot" style="width:400px" />
 				<figcaption>Screenshot of <code>bez/teapot.bez</code> evaluated by my implementation.</figcaption>
 			</figure>
 
@@ -176,7 +176,7 @@
 				</li>
 				<li>Normalize <code>result</code> and return it.</li>
 			</ol>
-			Now that every vertex in a given mesh will have a unit normal vector associated with it when we enable Phong shading, we are able to vastly improve the appearance of 3D ojects, as seen below.
+			<p>Now that every vertex in a given mesh will have a unit normal vector associated with it when we enable Phong shading, we are able to vastly improve the appearance of 3D ojects, as seen below.</p>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -194,10 +194,10 @@
 			<h3>Part 4: Edge flip</h3>
 			When it came to implementing edge flips, I really concerned myself with planning out all of the pointer reassignments that needed to take place so that I would not have to try to debug any confusing errors stemming from incorrect pointers. To make things easier on myself, I assumed every edge flip operation looked like the diagram below, where the halfedge associated with the edge we want to flip is rooted at vertex b:
 			<figure>
-				<img src="images/task4_graph.png" alt="Teapot" style="width:50%" />
+				<img src="images/task4_graph.png" alt="Teapot" style="width:400px" />
 				<figcaption>Diagram of an edge flip operation</figcaption>
 			</figure>
-			Additionally, I split my code into distinct sections (and added plently of comments) that helped me structure each individual step of the operation because I felt it allowed me to think things through more thoroughly. In general, I grouped my pointer reassignments by face. Referring to the diagram above, I made sure to set the next, twin, vertex, edge, and face pointer for every halfedge in face ABC before dealing with the halfedges in face BCD. I also found it extremely helpful to define variables with meaningful names for the various <code>VertexIter</code>s, <code>EdgeIter</code>, and <code>HalfedgeIter</code>s I would use throughout the pointer reassignment process (ex. edge_ab, vertex_b, etc.). This coding approach along with my pre-planning helped me sucessfully implement <code>HalfedgeMesh::flipEdge()</code> without a painful debugging process. The pictures below display my mesh editor's edge flipping functionality in action.
+			<p>Additionally, I split my code into distinct sections (and added plently of comments) that helped me structure each individual step of the operation because I felt it allowed me to think things through more thoroughly. After performing a boundary check, I grouped my pointer reassignments by face. Referring to the diagram above, I made sure to set the next, twin, vertex, edge, and face pointer for every halfedge in face ABC before dealing with the halfedges in face BCD. I also found it extremely helpful to define variables with meaningful names for the various <code>VertexIter</code>s, <code>EdgeIter</code>, and <code>HalfedgeIter</code>s I would use throughout the pointer reassignment process (ex. edge_ab, vertex_b, etc.). This coding approach along with my pre-planning helped me sucessfully implement <code>HalfedgeMesh::flipEdge()</code> without a painful debugging process. The pictures below display my mesh editor's edge flipping functionality in action. Due to the fact that this function solely involves pointer reassignments, I can ensure the function executes in constant time, regardless of the size of the mesh</p>
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -215,8 +215,31 @@
 			</div>
 
 			<h3>Part 5: Edge split</h3>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/task5_1.png" width="400px" />
+							<figcaption><code>dae/torus/input.dae</code> before edge splitting</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/task5_2.png" width="400px" />
+							<figcaption><code>dae/torus/input.dae</code> with edge splitting</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/task5_3.png" width="400px" />
+							<figcaption><code>dae/cow.dae</code> without any edge operations</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/task5_4.png" width="400px" />
+							<figcaption><code>dae/cow.dae</code> with a combination of edge flips and edge splits</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
 			<h3>Part 6: Loop subdivision for mesh upsampling</h3>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
