@@ -208,19 +208,19 @@
 						</td>
 						<td style="text-align: center;">
 							<img src="images/task4_2.png" width="400px" />
-							<figcaption>Teapot with a number of flipped edges</figcaption>
+							<figcaption>Teapot with some flipped edges</figcaption>
 						</td>
 					</tr>
 				</table>
 			</div>
 
 			<h3>Part 5: Edge split</h3>
-			Next, I implemented edge splits. I used the same approach as I did for edge flips, only this time I needed to be more careful, as edge splits involve many more pointer reassignments than edge flips <b>and</b> require adding new mesh elements. My implementation of <code>HalfedgeMesh::splitEdge()</code> creates one new vertex (vertex m), two new faces, three new edges, and six new halfedges. Once again, I referred to a diagram to help me visualize the edge split operation and help me split my pointer reassignments by face.
+			Next, I implemented edge splits. I used the same approach as I did for edge flips, only this time I needed to be more careful, as edge splits involve many more pointer reassignments than edge flips <b>and</b> require adding new mesh elements. My implementation of <code>HalfedgeMesh::splitEdge()</code> creates one new vertex (vertex m), two new faces, three new edges, and six new halfedges. Once again, I referred to a diagram to help me visualize the edge split operation and help me group my pointer reassignments by face.
 			<figure>
 				<img src="images/task5_graph.png" alt="Edge Split" style="width:400px" />
 				<figcaption>Diagram of an edge split operation</figcaption>
 			</figure>
-			<p>As before, I did lots of pre-planning when it came to how I would go about assigning pointers. Splitting things up by face proved to be incredibly helpful once again, as it allowed me to break the problem down into several manageable chunks. In my implementation, I chose not to use <code>Halfedge::setNeighbors()</code> because I preferred seeing each pointer assignment written out, thinking it would make it easier to spot any inconsistencies. While I do think this approach helped a bit when it came to compartmentalizing my approach, it resulted in the function taking up almost 150 lines of code, which is not very ideal for readability. Like with Part 4, this operation also runs in constant time given that it is just a bunch of pointer assignments and all mesh elements remain connected to the mesh. As seen below, this gives us the ability to edit 3D meshes in a new way. We can even combine edge flips with edge splits to subdivide surfaces, allowing us to increase the resolution of our models.</p>
+			<p>As before, I did lots of pre-planning when it came to how I would go about assigning pointers. Splitting things up by face proved to be incredibly helpful once again, as it allowed me to break the problem down into several manageable chunks. In my implementation, I chose not to use <code>Halfedge::setNeighbors()</code> because I preferred seeing each pointer assignment written out, thinking it would make it easier to spot any inconsistencies. While I do think this approach helped a bit when it came to compartmentalizing my approach, it resulted in the function taking up almost 150 lines of code, which is not very ideal for readability. Like with Part 4, this operation also runs in constant time given that it is just a bunch of pointer assignments. As seen below, this gives us the ability to edit 3D meshes in a new way. We can even combine edge flips with edge splits to subdivide surfaces, allowing us to increase the resolution of our models.</p>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -245,6 +245,39 @@
 					</tr>
 				</table>
 			</div>
+
+			<p>While I did not run into any major debugging issues at first, I would eventually have to revisit my implementation for part 5 after completing part 6. After coding Loop subdivision for mesh upsampling, I was running into an issue where upsampled meshes would form geometric inconsistencies, seemingly out of nowhere. Below, I'm using <i>dae/icosahedron/input.dae</i> to demonstate the issue.</p>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/task5_5.png" width="400px" />
+							<figcaption>After 1 level of subdivision</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/task5_6.png" width="400px" />
+							<figcaption>After 2 levels of subdivision</figcaption>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/task5_7.png" width="400px" />
+							<figcaption>After 3 levels of subdivision</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/task5_8.png" width="400px" />
+							<figcaption>After 4 levels of subdivision</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
+			At first, I believed the issue stemmed from the section of the Loop subdivision algorithm where you recalculate vertex positions. After all, what else would cause vertices to end up in the wrong place after subdividing? Unfortunately, I could not find an issue with my part 6 implementation that would cause something like this. The answer eventually came after I took the time to manually step through the subdivision algorithm on the center pentagon shape in <i>dae/icosahedron/input.dae</i>, one of the areas that sufferred from this issue when subdividing. After splitting all of the edges around the center of the pentagon, I noticed the degree of the center vertex had changed from 5 to 4 when it should not have. This told me that I was forgetting to reference/assign the new halfedges being created in my edge split implementation, causing the degree of the center vertex to change because there was no halfedge rooted there. Luckily, this was a fairly quick fix. Referencing the edge split diagram above, all I needed to do was add the following code to make sure everything was being properly accounted for:
+			<code>
+				a->halfedge() = a_to_m;
+				b->halfedge() = b_to_m;
+				c->halfedge() = c_to_m;
+				d->halfedge() = d_to_m;
+			</code>
 			<h3>Part 6: Loop subdivision for mesh upsampling</h3>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
