@@ -48,8 +48,7 @@
 	-->
 
 			<h2>Overview</h2>
-			Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
-
+			In this homework, I implemented several components of a mesh editor are incredibly important in the world of 3D modeling/design. First, I implemented the evaluation of bézier curves and surfaces with de Casteljau's algorithm, which allows the program to display continuous, curving lines/surfaces in 3D. Next I improved the editor's shading capabilities by implementing a functions to find area-weighted vertex normals, allowing my program to get a more accurate sense of the direction vertices are oriented in. These normals can then be interpolated between, allowing the editor to calculate shading on a per-pixel basis rather than per-triangle. Next, I added some features that let the user change the actual topology of a mesh, like edge flip and edge split operations. Finally, I used edge flip and split operations to help implement Loop subdivision. Of all the things I've built in this assignment, I'm incredibly impressed by the power of Loop subdivision to completely change the shape of an initially simple mesh. Watching it round off the corners of a simplistic cube mesh and dramatically increase the number of vertices/edges with a single button press is incredibly cool. I also find myself incredibly impressed at the speed with which my mesh editor can process data when subdividing meshes with tens of thousands (or more) vertices and edges. This homework also gave me the opportunity to do lots of low-level memory mangament work in order to implement edge flip and edge split, both of which involve lot of pointer reassignments and potentially involve adding edges and vertices to a mesh. There are many more moving parts to keep track of than I initially thought when these operations were presented in class, and it felt great seeing things work properly after drawing out several diagrams and planning out the order in which I should reassign the values of things to make sure every halfedge, edge, vertex, and face was accounted for. Lastly, I thought the lighting/shading effect I acheived through area-weighted vertex norms was incredibly cool and looked very good considering the relative simplicity of its implementation. I'd be very curious to see how much I can improve upon this lighting with things like ray tracing or even path tracing in later assignments/projects.
 			<h2>Section I: Bezier Curves and Surfaces</h2>
 
 			<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
@@ -275,17 +274,17 @@
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<pre>
 				<code>
-					a->halfedge() = a_to_m;
-					b->halfedge() = b_to_m;
-					c->halfedge() = c_to_m;
-					d->halfedge() = d_to_m;
+a->halfedge() = a_to_m;
+b->halfedge() = b_to_m;
+c->halfedge() = c_to_m;
+d->halfedge() = d_to_m;
 					</code>
 				</pre>
 			</div>
 			<h3>Part 6: Loop subdivision for mesh upsampling</h3>
 			For the last part of the assignment, I needed to implement Loop subdivision for mesh upsampling, an incredibly powerful algorithm that can be used to incease the resolution of a given mesh without requiring an artist/modeler to redo anything. Luckily, the spec contained pretty thorough notes on how to go about implementing the algorithm. Additionally, <code>MeshResampler::upsample()</code> already contained comments that outlined a general approach. This allowed me to jump right in, eventually resulting in the following solution:
 			<ol>
-				<li>Loop through all vertices in the input mesh and calculate their new position. For each vertex <code>v</code>, I defined a vector <code>original_neighbor_position_sum</code> and value <code>u</code>, which was equal to either <sup>3</sup>&frasl;<sub>16</sub> or <sup>3</sup>&frasl;<sub>(8n)</sub> depending on the vertex degree <code>n</code>. Then, iterate though all neighboring vertices an add their position to <code>original_neighbor_position_sum</code>. After completing the loop, set <code>v->newPosition</code> to <code>(1 - n * u) * v->position + u * original_neighbor_position_sum</code>. Lastly, set <code>v->isNew</code> to false to ensure that the program knows it is a part of the original mesh.</li>
+				<li>Loop through all vertices in the input mesh and calculate their new position. For each vertex <code>v</code>, I defined a vector <code>original_neighbor_position_sum</code> and value <code>u</code>, which was equal to either <sup>3</sup>&frasl;<sub>16</sub> or <sup>3</sup>&frasl;<sub>(8*n)</sub> depending on the vertex degree <code>n</code>. Then, iterate though all neighboring vertices an add their position to <code>original_neighbor_position_sum</code>. After completing the loop, set <code>v->newPosition</code> to <code>(1 - n * u) * v->position + u * original_neighbor_position_sum</code>. Lastly, set <code>v->isNew</code> to false to ensure that the program knows it is a part of the original mesh.</li>
 				<li>Next, iterate through every edge in the mesh and calculate the position of the new vertex that will be located in the middle of that edge when we split it later on. Using halfedge traversal, we can get the positions of the four vertices (a, b, c, d) surrounding a particular edge <code>e</code>. Then, set <code>e->newPosition</code> equal to <code>3/8 * (a + b) + 1/8 * (c + d)</code> as described in lecture. I also set <code>e->isNew</code> to false to make sure it was considered part of the original mesh.</li>
 				<li>Split every edge in the original mesh in any order. I did this by looping through every edge in the mesh, checking if the current edge was not new and that neither of the vertices that make up the current edge are new. If so, split the edge. After doing so, mark the newly created vertex <code>m</code> as new and mark edges AM and MD (using the edge split diagram from above as reference) as new. Since edges CM and MB lie in the original edge path, we do not mark them as new. If we did mark them as new, it would cause problems when we flip edges in the next step. At this point I also set <code>m->newPosition</code> equal to the new position value I stored in the edge earlier.</li>
 				<li>Iterate through all of the edges, chekcing if the current edge is new and, if so, it connects an old vertex to a new vertex. If all of that is true, flip the current edge.</li>
@@ -348,7 +347,7 @@
 					</tr>
 				</table>
 			</div>
-			The main driver bhind this asymmetry is number of edges in the cube. In addition to the 12 edges that typically make up a cube, there is a diagonal edge on each face giving us a total of 18 edges. Despite that, we still only have 8 vertices. As a result, the vertices do not all have the same degree, meaning their positions are affected differently when we calculate <code>(1 - n * u) * v->position + u * original_neighbor_position_sum</code>. Subsequent levels of subdivision propogate this asymmetry. In order to combat this, we can try to pre-process the cube by splitting each of the diagonal edges. In doing so, all vertices now have degree 6.
+			<p>The main driver bhind this asymmetry is number of edges in the cube. In addition to the 12 edges that typically make up a cube, there is a diagonal edge on each face giving us a total of 18 edges. Despite that, we still only have 8 vertices. As a result, the vertices do not all have the same degree, meaning their positions are affected differently when we calculate <code>(1 - n * u) * v->position + u * original_neighbor_position_sum</code>. Subsequent levels of subdivision propogate this asymmetry. In order to combat this, we can try to pre-process the cube by splitting each of the diagonal edges. In doing so, all vertices now have degree 6.</p>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
