@@ -47,7 +47,7 @@
 
 			<h2>Part 1: Ray Generation and Scene Intersection</h2>
 			<p>When ray tracing a scene, one must first generate rays to send out from the camera. When these rays collide with geometry, they can be used to calculate a variety of useful data points, including surface normals at the point of intersection and how much light is being emitted/reflected towards the camera. When generating rays, it's crucial to properly convert between camera space and world space to ensure that 1) the origin of each ray is actually within the boundaries of the current pixel we want to raytrace and 2) rays are being properly sent towards the scene (where all of the geometry is) instead of shooting off into an empty section of world space. I handled the logic for this section of part 1 in <code>Camera::generate_ray()</code>. Once rays are sent out from the camera, the next step in the core rendering pipeline is to check for intersections between each ray and the primitives in the scene. As mentioned previously, this step is incredibly important because it allows us to actually engage with the properties of the materials/primitives, which is how ray/path tracing is able to accurately light a scene.</p>
-			<p>I had a few options when it came to choosing an approach for calculating ray-triangle intersection. The first and simplest approach would be to use a point on the triangle and one of its normals to first test if the ray intersect with the plane the triangle lies on. If so, one can then use the <code>t</code> value at the intersection point to derive the coordinates of the intersection in world space. From there, you can do point-in-triangle tests (much like we did in Homework 1) to determine if the ray collides with a triangle. The second approach is to implement the Möller Trumbore Algorithm for ray-triangle intersection presented in lecture. I chose to go with Möller Trumbore for a few reasons, the main one being speed. Compared to the first approach, Möller Trumbore involves fewer division, multiplication, and addition operations. When tracing billions of rays for a single scene, these small optimizations add up. The second main reason for using this algorithm is it derives barycentric coordinates in addition to the <code>t</code> value corresponding to the intersection point on the plane. From there, it's easy to verify if the intersection lie within the triangle by checking if the barycentric coordinates are non-negative. Having barycentric coordinates also allows us to very easily interpolate between the triangles vertex normals, which are crucial for smooth shading. Had I chosen to use a different strategy for ray-triangle intersection, finding barycentric coordinates in 3D would prove to be a more difficult and computationally expensive task. I implemented Möller Trumbore in <code>Triangle::intersect</code> and <code>Triangle::has_intersection</code> as presented in lecture, perfroming a few additional checks to ensure the intersection point is located at a valid place along the ray. With basic ray-primitive intersection in place, I rendered the following images with normal shading.</p>
+			<p>I had a few options when it came to choosing an approach for calculating ray-triangle intersection. The first and simplest approach would be to use a point on the triangle and one of its normals to first test if the ray intersect with the plane the triangle lies on. If so, one can then use the <code>t</code> value at the intersection point to derive the coordinates of the intersection in world space. From there, you can do point-in-triangle tests (much like we did in Homework 1) to determine if the ray collides with a triangle. The second approach is to implement the Moller Trumbore Algorithm for ray-triangle intersection presented in lecture. I chose to go with Moller Trumbore for a few reasons, the main one being speed. Compared to the first approach, Moller Trumbore involves fewer division, multiplication, and addition operations. When tracing billions of rays for a single scene, these small optimizations add up. The second main reason for using this algorithm is it derives barycentric coordinates in addition to the <code>t</code> value corresponding to the intersection point on the plane. From there, it's easy to verify if the intersection lie within the triangle by checking if the barycentric coordinates are non-negative. Having barycentric coordinates also allows us to very easily interpolate between the triangles vertex normals, which are crucial for smooth shading. Had I chosen to use a different strategy for ray-triangle intersection, finding barycentric coordinates in 3D would prove to be a more difficult and computationally expensive task. I implemented Moller Trumbore in <code>Triangle::intersect</code> and <code>Triangle::has_intersection</code> as presented in lecture, perfroming a few additional checks to ensure the intersection point is located at a valid place along the ray. With basic ray-primitive intersection in place, I rendered the following images with normal shading.</p>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -74,7 +74,24 @@
 			</div>
 
 			<h2>Part 2: Bounding Volume Hierarchy</h2>
-			all images rendered at 800x600 resolution and 1 ray per pixel
+			<p>While ray intersection works fine for simple scenes with very little geometry, each intersection test iterates through every single primitive in order to determine if an intersection takes place, which is highly inefficient. This makes it all but impossible to render scenes with high polygon counts. One way to improve the performance of intersection tests is to partition 3D space with a Bounding Volume Hierarchy (BVH), a tree data structure that helps us only perfrom intersection tests in areas that a ray is actually traveling through. In order to improve the performance of my renderer for complicated scenes, I constucted a BVH in <code>BVHAccel::construct_bvh()</code>, which works as follows:</p>
+			<ol>
+				<li>Iterate between <code>start</code> and <code>end</code>, expanding <code>bbox</code> to include every primitive in the list. As you're iterating, increment a variable <code>size</code> to keep track of how many primitive are in the current node.</li>
+				<li>If <code>size <= max_leaf_size</code>, create a leaf node by setting <code>node->start = start</code>, <code>node->end = end</code>, <code>node->l = NULL</code>, and <code>node->r = NULL</code></li>.
+				<li>If not, calculate the longest axis by finding <code>max(bbox.extent.x, max(bbox.extent.y, bbox.extent.z))</code>. From there, sort primitives bewteen <code>start</code> and <code>end</code> by their centroids along chosen axis. For example, if the x axis is the logest axis, call
+<pre>
+<code>
+	if (largest_extent == bbox.extent.x) {
+		sort(start, end, [](Primitive* a, Primitive* b) {
+			return a->get_bbox().centroid().x < b->get_bbox().centroid().x; });
+	}
+</code>
+</pre>
+				
+				</li>
+				<li>From there, split around the median primitive and recursively call <code>construct_bvh()</code> by setting <code>node->l = construct_bvh(start, start + (size / 2), max_leaf_size)</code> and <code>node->r = construct_bvh(start + (size / 2), end, max_leaf_size)</code></li>
+			</ol>
+			<p>When it came to my splitting heuristic, I wanted to ensure that the BVH was as balanced as possible, meaning traversing the tree would be efficient regardless of the ray's direction in 3D space. Splitting along the longest axis helps ensure that primitives stored in leaf nodes will also be close to each other in world space. This means that if a ray intersects the bounding box of a leaf node, it has a high liklihood of intersecting one of the polugons stored there. If I deciced to, say,  split along the x axis every time, I could very well end up with leaf nodes containing primitives that are very far away from each other on the x and y axes, leading to sparsely populated bounding boxes where a ray is unlikely to intersect with a primitive even when it intersects the bounding box. Additionally, the choice to split along the median primitive instead of something like the average was done to keep the tree balanced. With BVH construction/traversal implemented in my renderer, I could now render very large .dae files with normal shading very quickly.</p>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -99,18 +116,7 @@
 					</tr>
 				</table>
 			</div>
-
-			meshedit/cow.dae at 800x600 resolution and 5856 primitives
-			- w/ BVH acceleration (0.0893 seconds, 0.0920 seconds, 0.0849 seconds)
-			- w/o BVH acceleration (24.7410 seconds, 25.9928 seconds, 26.8699 seconds)
-
-			sky/CBcoil.dae at 800x600 resolution and 7884 primitives
-			-  w/ BVH acceleration (0.0970 seconds, 0.0952 seconds, 0.1107 seconds)
-			- w/o BVH acceleration (36.8144 seconds, 48.9893 seconds, 50.7994 seconds)
-
-			meshedit/beetle.dae at 800x600 resolution and 7558 primitives
-			- w/ BVH acceleration (0.0827 seconds, 0.0727 seconds, 0.0716 seconds)
-			- w/o BVH acceleration (35.2912 seconds, 43.4277 seconds, 37.4212 seconds)
+			<p>To explore how much a BVH improves rendering performance, I examined rendering times for three moderately complex .dae files with and without BVH acceleration to see how they compare. For each .dae file, I rendered an image at 800x600 resolution with and without BVH acceleration three times to get a sense for the average performance. For meshedit/cow.dae (5856 primitives), I could render an image in about 0.089 seconds with BVH acceleration and about 25.87 seconds without BVH acceleration. For sky/CBcoil.dae (7884 primitives), I could render an image in about 0.10 seconds with BVH acceleration and about 45.53 seconds without BVH acceleration. Lastly, for meshedit/beetle.dae (7558 primitives), I could render an image in about 0.079 seconds with BVH acceleration and about 38.71 seconds without BVH acceleration. Across those 3 files, I saw an average speedup of about 412x. You'll notice that having fewer primitives does not always mean something will render faster with BVH, as meshedit/beetle.dae rendered faster than meshedit/cow.dae despite having 1702 more primitives. I imagine this has something to do with the density of polygons in the mesh, although I cannot say for sure. Regardless, we can see that BVH acceleration affords us the ability to render extremely complicated scenes very quickly, and will serve a crucial role later on as renders become increasingly computationally expensive.</p>
 
 			<h2>Part 3: Direct Illumination</h2>
 			64 of samples per pixel, 32 samples per light
@@ -217,41 +223,41 @@
 							<figcaption>m=1</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_6.png" width="150px" />
+							<img src="images/part4_6.png" width="125px" />
 							<figcaption>m=2</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_7.png" width="150px" />
+							<img src="images/part4_7.png" width="125px" />
 							<figcaption>m=3</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_8.png" width="150px" />
+							<img src="images/part4_8.png" width="125px" />
 							<figcaption>m=4</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_9.png" width="150px" />
+							<img src="images/part4_9.png" width="125px" />
 							<figcaption>m=5</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_10.png" width="150px" />
+							<img src="images/part4_10.png" width="125px" />
 							<figcaption>m=0</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_11.png" width="150px" />
+							<img src="images/part4_11.png" width="125px" />
 							<figcaption>m=1</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_12.png" width="150px" />
+							<img src="images/part4_12.png" width="125px" />
 							<figcaption>m=2</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_13.png" width="150px" />
+							<img src="images/part4_13.png" width="125px" />
 							<figcaption>m=3</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_14.png" width="150px" />
+							<img src="images/part4_14.png" width="125px" />
 							<figcaption>m=4</figcaption>
 						</td>
 						<td style="text-align: center;">
@@ -266,31 +272,31 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_16.png" width="200px" />
+							<img src="images/part4_16.png" width="400px" />
 							<figcaption>m=0</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_17.png" width="200px" />
+							<img src="images/part4_17.png" width="400px" />
 							<figcaption>m=1</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_18.png" width="200px" />
+							<img src="images/part4_18.png" width="400px" />
 							<figcaption>m=2</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_19.png" width="200px" />
+							<img src="images/part4_19.png" width="400px" />
 							<figcaption>m=3</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_20.png" width="200px" />
+							<img src="images/part4_20.png" width="400px" />
 							<figcaption>m=4</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_21.png" width="200px" />
+							<img src="images/part4_21.png" width="400px" />
 							<figcaption>m=100</figcaption>
 						</td>
 					</tr>
