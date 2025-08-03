@@ -118,6 +118,31 @@
 			<p>To explore how much a BVH improves rendering performance, I examined rendering times for three moderately complex .dae files with and without BVH acceleration to see how they compare. For each .dae file, I rendered an image at 800x600 resolution with and without BVH acceleration three times to get a sense for the average performance. For meshedit/cow.dae (5856 primitives), I could render an image in about 0.089 seconds with BVH acceleration and about 25.87 seconds without BVH acceleration. For sky/CBcoil.dae (7884 primitives), I could render an image in about 0.10 seconds with BVH acceleration and about 45.53 seconds without BVH acceleration. Lastly, for meshedit/beetle.dae (7558 primitives), I could render an image in about 0.079 seconds with BVH acceleration and about 38.71 seconds without BVH acceleration. Across those 3 files, I saw an average speedup of about 412x. You'll notice that having fewer primitives does not always mean something will render faster with BVH, as meshedit/beetle.dae rendered faster than meshedit/cow.dae despite having 1702 more primitives. I imagine this has something to do with the density of polygons in the mesh, although I cannot say for sure. Regardless, we can see that BVH acceleration affords us the ability to render extremely complicated scenes very quickly, and will serve a crucial role later on as renders become increasingly computationally expensive.</p>
 
 			<h2>Part 3: Direct Illumination</h2>
+			<p>The next thing to implement in my renderer was direct illumination, where we begine to simulate light transport in the scene. I implemented two methods of direct lighting for part 4, uniform hemisphere sampling and importance sampling. Direct lighting works by using a Monte Carlo estimator to approximate the amount of light arriving at a point. I wrote my implementation of direct lighting with uniform hemisphere sampling in <code>estimate_direct_lighting_hemisphere</code>, and it works as follows.</p> 
+			<ol>
+				<li>Enter a for loop that executes <code>num_samples</code> iterations.</li>
+				<li>Sample an incoming ray direction <code>w_j</code> in object space by calling <code>hemisphereSampler->get_sample()</code></li>
+				<li>Create a ray <code>test_ray</code> with origin <code>hit_p</code> and direction <code>o2w * w_j</code> (since <code>hit_p</code> is in world space). Set <code>min_t</code> to EPS_F.</li>
+				<li>Create a new intersection object <code>test_intersection</code></li>
+				<li>
+					If <code>this->bvh->intersect(test_ray, &test_intersection)</code>
+					<ul>
+						<li>Get the amount of light being emitted by the piece of geometry <code>L_in</code> by calling <code>test_intersection.primitive->get_bsdf()->get_emission();</code></li>
+						<li>Set <code>Vector3D reflected_proportion = isect.bsdf->f(w_j, w_out)</code> to find the proportion of incoming light the primitive <code>isect->primitive</code> reflects</li>
+						<li> Set <code>Vector3D cos_j = dot(w_j, w2o * isect.n)</code> to get the cosine of the angle bewteen the incoming light ray and the normal at the intersection point in world space.</li>
+						<li>Lastly, increment <code>L_out</code> by <code>(reflected_proportion * L_in * cos_j) / (1 / PI)</code>, with 1/PI being the pdf of the uniform hemisphere.</li>
+					</ul>
+				</li>
+				<li>After exiting the for loop, normalize <code>L_out</code> by dividing by <code>num_samples</code></li>
+			</ol>
+			<p>After implementing direct illumination with uniform hemisphere sampling, I moved on to write the code for direct lighting via importance sampling, which I wrote in <code>estimate_direct_lighting_importance</code></p>
+			<ol>
+				<li>Enter a for loop that iterates through each light in <code>scene->lights</code></li>
+				<li></li>
+
+			</ol>
+
+			
 			64 of samples per pixel, 32 samples per light
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -214,53 +239,53 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_4.png" width="125px" />
+							<img src="images/part4_4.png" width="135px" />
 							<figcaption>m=0</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_5.png" width="125px" />
+							<img src="images/part4_5.png" width="135px" />
 							<figcaption>m=1</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_6.png" width="125px" />
+							<img src="images/part4_6.png" width="135px" />
 							<figcaption>m=2</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_7.png" width="125px" />
+							<img src="images/part4_7.png" width="135px" />
 							<figcaption>m=3</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_8.png" width="125px" />
+							<img src="images/part4_8.png" width="135px" />
 							<figcaption>m=4</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_9.png" width="125px" />
+							<img src="images/part4_9.png" width="135px" />
 							<figcaption>m=5</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="images/part4_10.png" width="125px" />
+							<img src="images/part4_10.png" width="135px" />
 							<figcaption>m=0</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_11.png" width="125px" />
+							<img src="images/part4_11.png" width="135px" />
 							<figcaption>m=1</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_12.png" width="125px" />
+							<img src="images/part4_12.png" width="135px" />
 							<figcaption>m=2</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_13.png" width="125px" />
+							<img src="images/part4_13.png" width="135px" />
 							<figcaption>m=3</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_14.png" width="125px" />
+							<img src="images/part4_14.png" width="135px" />
 							<figcaption>m=4</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="images/part4_15.png" width="125px" />
+							<img src="images/part4_15.png" width="135px" />
 							<figcaption>m=5</figcaption>
 						</td>
 					</tr>
@@ -347,9 +372,6 @@
 				</table>
 			</div>
 			<h2>Part 5: Adaptive Sampling</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-			<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 			<h2>Additional Notes (please remove)</h2>
