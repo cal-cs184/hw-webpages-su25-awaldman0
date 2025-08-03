@@ -224,7 +224,7 @@
 			<p>As you can see, the noise levels in the first two renderings make it incredibly difficult to spot the shaow cast by the dragon's head and neck. Only when we increase the number of light rays do pieces of geometry have the chance to gather enough light samples to differentiate bewteen areas that are directly lit from those in shadow.</p>
 			<h2>Part 4: Global Illumination</h2>
 			<p>While simulating direct lighting is fascinating, it doesn't quite properly represent how lights work in real life. For example, you'll notice that with direct lighting, the ceiling is completely unlit. To get more realistic lighting, we want to simulate multiple light bounces within our scene, which is called indirect lighting. My implementation for indirect lighting can be found in <code>at_least_one_bounce_radiance()</code> and it works as follows:</p>
-			<p>First, I made a quick change to <code>raytrace_pixel</code>, initializing the depth of newly created rays to <code>max_ray_depth</code></p>
+			<p>First, I made a quick change to <code>raytrace_pixel</code>, initializing the depth of newly created rays to <code>max_ray_depth</code>. Then, I moved on to <code>at_least_one_bounce_radiance</code>.</p>
 			<ol>
 				<li>Being that this function will call itself recursively, I began with a couple base cases. If the depth of the current ray is zero, return <code>zero_bounce_radiance(r, isect)</code>. Alternatively, if the depth is one, return <code>one_bounce_radiance(r, isect)</code></li>
 				<li>Define <code>double continuation_prob = 1</code> (important for Russian Roulette later on), <code>Vector3D wi</code>, and <code>double pdf</code>. Then, call <code>isect.bsdf->sample_f(w_out, &wi, &pdf)</code> to take one random sample of a direction based on the BSDF at the current hit point.</li>
@@ -250,7 +250,7 @@
 					</tr>
 				</table>
 			</div>
-			<p>Since global lightin is a combination of direct and indirect lighting, we can compare what a scene looks like only direct illumination, then only indirect illumination. Since I showed dae/sky/CBspheres_lambertian.dae with full global lighting above, I thought it would be fitting to use that scene to help us compare/contrast.</p>
+			<p>Since global lighting is a combination of direct and indirect lighting, we can compare what a scene looks like only direct illumination, then only indirect illumination. Since I showed dae/sky/CBspheres_lambertian.dae with full global lighting above, I thought it would be fitting to use that scene to help us compare/contrast.</p>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
