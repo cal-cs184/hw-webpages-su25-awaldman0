@@ -78,7 +78,8 @@
 			<ol>
 				<li>Iterate between <code>start</code> and <code>end</code>, expanding <code>bbox</code> to include every primitive in the list. As you're iterating, increment a variable <code>size</code> to keep track of how many primitive are in the current node.</li>
 				<li>If <code>size <= max_leaf_size</code>, create a leaf node by setting <code>node->start = start</code>, <code>node->end = end</code>, <code>node->l = NULL</code>, and <code>node->r = NULL</code></li>
-				<li>If not, calculate the longest axis by finding <code>max(bbox.extent.x, max(bbox.extent.y, bbox.extent.z))</code>. From there, sort primitives bewteen <code>start</code> and <code>end</code> by their centroids along chosen axis. For example, if the x axis is the logest axis, call
+				<li>
+					If not, calculate the longest axis by finding <code>max(bbox.extent.x, max(bbox.extent.y, bbox.extent.z))</code>. From there, sort primitives bewteen <code>start</code> and <code>end</code> by their centroids along chosen axis. For example, if the x axis is the logest axis, call
 <pre>
 <code>
 	if (largest_extent == bbox.extent.x) {
@@ -118,7 +119,7 @@
 			<p>To explore how much a BVH improves rendering performance, I examined rendering times for three moderately complex .dae files with and without BVH acceleration to see how they compare. For each .dae file, I rendered an image at 800x600 resolution with and without BVH acceleration three times to get a sense for the average performance. For meshedit/cow.dae (5856 primitives), I could render an image in about 0.089 seconds with BVH acceleration and about 25.87 seconds without BVH acceleration. For sky/CBcoil.dae (7884 primitives), I could render an image in about 0.10 seconds with BVH acceleration and about 45.53 seconds without BVH acceleration. Lastly, for meshedit/beetle.dae (7558 primitives), I could render an image in about 0.079 seconds with BVH acceleration and about 38.71 seconds without BVH acceleration. Across those 3 files, I saw an average speedup of about 412x. You'll notice that having fewer primitives does not always mean something will render faster with BVH, as meshedit/beetle.dae rendered faster than meshedit/cow.dae despite having 1702 more primitives. I imagine this has something to do with the density of polygons in the mesh, although I cannot say for sure. Regardless, we can see that BVH acceleration affords us the ability to render extremely complicated scenes very quickly, and will serve a crucial role later on as renders become increasingly computationally expensive.</p>
 
 			<h2>Part 3: Direct Illumination</h2>
-			<p>The next thing to implement in my renderer was direct illumination, where we begine to simulate light transport in the scene. I implemented two methods of direct lighting for part 4, uniform hemisphere sampling and importance sampling. Direct lighting works by using a Monte Carlo estimator to approximate the amount of light arriving at a point. I wrote my implementation of direct lighting with uniform hemisphere sampling in <code>estimate_direct_lighting_hemisphere</code>, and it works as follows.</p> 
+			<p>The next thing to implement in my renderer was direct illumination, where we begine to simulate light transport in the scene. I implemented two methods of direct lighting for part 4, uniform hemisphere sampling and importance sampling. Direct lighting works by using a Monte Carlo estimator to approximate the amount of light arriving at a point. I wrote my implementation of direct lighting with uniform hemisphere sampling in <code>estimate_direct_lighting_hemisphere</code>, and it works as follows.</p>
 			<ol>
 				<li>Enter a for loop that executes <code>num_samples</code> iterations.</li>
 				<li>Sample an incoming ray direction <code>w_j</code> in object space by calling <code>hemisphereSampler->get_sample()</code></li>
@@ -138,7 +139,8 @@
 			<p>After implementing direct illumination with uniform hemisphere sampling, I moved on to write the code for direct lighting via importance sampling, which I wrote in <code>estimate_direct_lighting_importance</code></p>
 			<ol>
 				<li>Enter a for loop that iterates through each light in <code>scene->lights</code></li>
-				<li>If the light is a point light, do the following:
+				<li>
+					If the light is a point light, do the following:
 					<ul>
 						<li>Define <code>Vector3D wi</code>, <code>double distToLight</code>, <code>pdf</code>, and <code>Vector3D L_in</code>. Set <code>L_in</code> equal to the output of <code>light->sample_L(hit_p, &wi, &distToLight, &pdf)</code></li>
 						<li>Then, like before, define <code>test_ray</code> with origin <code>hit_p</code> and direction <code>wi</code> (the incoming direction is in world space this time) as well as <code>test_intersection</code>. Set the ray's minimum distance to <code>EPS_F</code> and the max to <code>distToLight</code>.</li>
@@ -146,8 +148,9 @@
 						<li>Since all samples from a point light will be the same, we do not need to take multiple samples from this light, regardless of the number of light rays specified in the command line</li>
 					</ul>
 				</li>
-	
-				<li>If the light is not a point light, do the following:
+
+				<li>
+					If the light is not a point light, do the following:
 					<ul>
 						<li>Define <code>Vector3D L_curr</code> </li>
 						<li>Enter a for loop that performs <code>ns_area_light</code> iterations</li>
@@ -159,7 +162,7 @@
 			</ol>
 
 			<p>With both methods of direct lighting implemented, we can see how they perform lighting a variety of images, each with 64 of samples per pixel and 32 samples per light</p>
-		
+
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -405,7 +408,28 @@
 			</div>
 			<p>Unsurprisingly, having a low number of samples per pixel leads to a very noisy image, especially when trying to render complex models like the one above. Using Russian Roulette for these render also contributes a bit of noise due to varying light path lengths from pixel-to-pixel, but the number of samples per pixel is by far the main factor when it comes to image quality. Details like the tread pattern on wall-e's tracks and the internal mechanisms of his wheels are very difficult to make out until we reach 64 or 256 samples per pixel. We're also unable to make out the soft shadows resulting from multiple light bounces in and around wall-e until we render at higher sample rates. There are unquestionable speed advatages when it comes to rendering things out at lower sampling rates, but for a scene like this where all of the viewer's focus lies on the subject, other renders simply cannot match the quality of 1024 samples per pixel.</p>
 			<h2>Part 5: Adaptive Sampling</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		</div>
+			<p>As is evident from the pictures of wall-e from above, increasing the number of samples per pixel is a surefire way to reduce the amount of noise in the final render. As we increase the number of samples per pixel, we increase the cost of computation for every single pixel on screen, regardless of the geometric complexity of our scene. In practice, a blank wall does not need to be sampled as many times as a complex, high-poly mesh in order to look realistic. One way to avoid this oversampling to use adaptive sampling, a technique that uses the mean and variance of a pixel's color value as the number of samples increases to determine when the pixel has converged, and no longer needs to be sampled. This way, we end up increasing the efficiency of our renderer by only sampling at high rates when it is absolutely necessary. In order to implement adaptive sampling, I needed to modify code I had written in <code>raytrace_pixel()</code> all the way back in part 1. My implementation works as follows:</p>
+			<ol>
+				<li>Before entering the for loop, define <code>float s1 = 0.0</code>, <code>float s2 = 0.0</code>, and <code>int samples_taken</code></li>
+				<li>Every iteration of the for loop, increment <code>s1</code> by the illuminance of the color just sampled, increment <code>s2</code> by the illuminance squared, and set <code>samples_taken = i + 1</code></li>
+				<li>If <code>samples_taken > 1 && samples_taken % samplesPerBatch == 0</code>, calculate whether or not the current pixel has converged by doing the following calculations explained in the spec:
+<pre>
+	<code>
+if (samples_taken > 1 && samples_taken % samplesPerBatch == 0) {
+	float mean = s1 / samples_taken;
+	float var = (1 / (samples_taken - 1)) * (s2 - ((s1 * s1) / samples_taken));
+	float I = 1.96 * (sqrt(var / samples_taken));
+	if (I <= maxTolerance * mean) {
+        sampleBuffer.update_pixel(color / samples_taken, x, y);
+        sampleCountBuffer[x + y * sampleBuffer.w] = samples_taken;
+        return;
+	}
+}
+	</code>
+</pre>
+				</li>
+				<li>If the function completes the for loop, the pixel did not converge prior to reaching <code>ns_aa</code> samples, so update <code>sampleBuffer</code> and <code>sampleCountBuffer</code> as in part 1</li>
+			</ol>
+</div>
 	</body>
 </html>
